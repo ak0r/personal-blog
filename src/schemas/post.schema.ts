@@ -6,9 +6,11 @@ import { baseSchema } from './base.schema';
  * published is required — every post must have a date.
  */
 export const postSchema = baseSchema.extend({
+  category: z.enum(['tech', 'travel']).optional(),
   published: z.coerce.date(),
   cover: z.string().optional(),
   tags: z.array(z.string()).optional(),
+  location: z.string().optional(),
   series: z.string().optional(),
   order: z.number().optional(),
 });

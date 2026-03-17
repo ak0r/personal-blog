@@ -12,6 +12,9 @@ import {
   getRelatedPosts,
   calculateReadingTime,
 } from "@/utils/content.utils";
+import { getGalleryImages } from '@/utils/image.utils';
+import PostGallery from '@/components/PostGallery.astro';
+import PostCategory from '@/components/PostCategory.astro';
 import { siteConfig } from "@/site.config";
 
 interface Props {
@@ -19,12 +22,15 @@ interface Props {
 }
 
 const { entry } = Astro.props;
-const { title, description, published, tags, cover, series } = entry.data;
+const { title, description, published, tags, cover, series, category, location } = entry.data;
 
 const allPosts = await getPublishedPosts();
 const related = getRelatedPosts(entry, allPosts, siteConfig.relatedPosts);
 const seriesPosts = series ? await getSeriesPosts(series) : [];
 const readTime = calculateReadingTime(entry.body ?? "").text;
+
+// Fetch images from post-1/gallery directory
+const galleryImages = getGalleryImages(entry.filePath);
 ---
 
 <BaseLayout>
@@ -39,7 +45,23 @@ const readTime = calculateReadingTime(entry.body ?? "").text;
   />
 
   <PageHeader slot="header" {title} pagefind>
-    <PostMeta slot="meta" {published} {readTime} {tags} />
+    <Fragment slot="meta">
+      <PostMeta {published} {readTime} {tags} />
+      {(location || category) && (
+        <div class="post-context">
+          {location && (
+            <span class="post-location">
+              <span aria-hidden="true">📍</span>
+              {location}
+            </span>
+          )}
+          {location && category && (
+            <span class="post-meta-sep" aria-hidden="true">·</span>
+          )}
+          {category && <PostCategory category={category} />}
+        </div>
+      )}
+    </Fragment>
   </PageHeader>
 
   <Fragment>
@@ -48,6 +70,7 @@ const readTime = calculateReadingTime(entry.body ?? "").text;
     {tags && tags.map((tag) => (
       <meta data-pagefind-filter="tag[content]" content={tag} />
     ))}
+
     {cover && (
       <figure class="post-cover">
         <img src={cover} alt={title} />
@@ -57,6 +80,10 @@ const readTime = calculateReadingTime(entry.body ?? "").text;
     <section class="post-content">
       <slot />
     </section>
+    
+    {galleryImages.length > 0 && (
+      <PostGallery images={galleryImages} galleryId={entry.id} />
+    )}
   </Fragment>
 
   <Fragment slot="navigation">

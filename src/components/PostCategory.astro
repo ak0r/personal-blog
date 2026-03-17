@@ -1,0 +1,24 @@
+---
+/**
+ * PostCategory.astro
+ *
+ * Reusable category pill for post listings and post headers.
+ * Renders nothing if category is undefined.
+ *
+ * Usage:
+ *   import PostCategory from '@/components/PostCategory.astro';
+ *   <PostCategory category={post.data.category} />
+ */
+
+interface Props {
+  category?: 'tech' | 'travel';
+}
+
+const { category } = Astro.props;
+---
+
+{category && (
+  <span class={`post-category-tag post-category-tag--${category}`} aria-label={`Content category: ${category}`}>
+    {category}
+  </span>
+)}
