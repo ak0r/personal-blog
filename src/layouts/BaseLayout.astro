@@ -1,0 +1,74 @@
+---
+
+/**
+ * BaseLayout — shared structural scaffold for all content pages.
+ *
+ * Slots:
+ *   header     — page title, meta (PageHeader)
+ *   content    — main content, wrapped in <article data-pagefind-body>
+ *   navigation — contextual navigation (SeriesNav, prev/next, breadcrumbs)
+ *   after      — supplementary content (related posts, comments)
+ *
+ * Used by BlogLayout and PageLayout. Forks can use it directly
+ * for new layout types without touching Muul's wrapper layouts.
+ */
+
+import { siteConfig } from '@/site.config';
+import Head from "@/components/Head.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import Container from "@/components/Container.astro";
+import ThemeInit from '@/components/ThemeInit.astro';
+
+interface Props {
+  lang?: string;
+  containerClass?: string;
+  setWidth?: string;
+}
+
+const { lang = "en", containerClass = 'py-4 sm:py-8', setWidth } = Astro.props;
+
+const contentWidth = setWidth || siteConfig.pageWidth || 'lg';
+---
+
+<!DOCTYPE html>
+<html lang={lang}>
+  <Head>
+    <slot name="seo" slot="seo" />
+    <slot name="head" slot="head" />
+  </Head>
+  <body>
+    <!-- Light/Dark: must run before paint to avoid FOUC -->
+    <ThemeInit />
+
+    <!-- Header -->
+    <Header />
+    
+    <Container class={containerClass} setWidth={contentWidth}>
+      <!-- Main content -->
+      <main>
+        {/* Page/Post Header Section */}
+        <slot name="header" />
+        
+        {/* Page/Post Meta Section */}
+        <slot name="meta" />
+        
+        {/* Page/Post Content */}
+        <slot />
+        
+        {/* Post Navigation */}
+        <slot name="navigation" />
+        
+        {/* Additional Content */}
+        <slot name="after" />
+
+      </main>
+    </Container>
+    
+    <!-- Footer -->
+    <Footer />
+
+    <!-- Additional page-specific scripts -->
+    <slot name="scripts" />
+  </body>
+</html>

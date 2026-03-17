@@ -1,0 +1,23 @@
+---
+/**
+ * TagList — renders a wrapped list of Tag links with counts.
+ * Used on tags/index.astro.
+ *
+ * Accepts entries from getAllTags() — a Map<string, number> spread to array.
+ */
+import Tag from "@/components/Tag.astro";
+
+interface Props {
+  tags: [string, number][];
+}
+
+const { tags } = Astro.props;
+---
+
+<div class="tag-list" role="list" aria-label="All tags">
+  {tags.map(([tag, count]) => (
+    <div role="listitem">
+      <Tag {tag} {count} />
+    </div>
+  ))}
+</div>

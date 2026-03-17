@@ -1,0 +1,24 @@
+---
+/**
+ * Tag — a single tag rendered as a link.
+ *
+ * With count:    #tag (3)
+ * Without count: #tag
+ *
+ * Used by TagList. Can also be used inline wherever a tag link is needed.
+ */
+
+interface Props {
+  tag: string;
+  count?: number;
+}
+
+const { tag, count } = Astro.props;
+---
+
+<a href={`/tags/${tag}`} class="tag badge-outline">
+  <span>#{tag}</span>
+  {count !== undefined && (
+    <span class="tag-count">({count})</span>
+  )}
+</a>

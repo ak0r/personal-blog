@@ -1,0 +1,125 @@
+/* ─── Typography ───────────────────────────────────────────────────────────
+   @layer base  — global element defaults
+   @layer components — .post-content overrides (wins by layer order, no specificity tricks)
+   ──────────────────────────────────────────────────────────────────────── */
+
+@layer base {
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold font-serif leading-tight;
+    &:first-child { @apply mt-0; }
+  }
+
+  h1 { @apply text-4xl mt-10 mb-6; }
+  h2 { @apply text-3xl mt-8 mb-5; }
+  h3 { @apply text-2xl mt-6 mb-4; }
+  h4 { @apply text-xl  mt-5 mb-3; }
+  h5 { @apply text-lg  mt-4 mb-2; }
+  h6 { @apply text-base mt-4 mb-2; }
+
+  p {
+    @apply mb-4;
+    &:last-child { @apply mb-0; }
+  }
+
+  a {
+    @apply text-foreground underline-offset-2 transition-opacity duration-300;
+    &:hover { @apply opacity-70; }
+  }
+
+  a[href^="http"],
+  a[href^="https"] {
+    @apply underline decoration-dotted;
+  }
+
+  /* External link indicator */
+  a[href^="http"]::after,
+  a[href^="https"]::after {
+    content: " ↗";
+    @apply align-super text-xs;
+  }
+
+  strong, b { @apply font-semibold; }
+  em, i      { @apply italic; }
+  small      { @apply text-sm; }
+
+  code {
+    @apply font-mono text-sm px-1 py-0.5 bg-muted rounded-sm;
+  }
+
+  pre {
+    @apply text-sm font-mono p-4 mb-4 bg-muted rounded-sm overflow-x-auto;
+    code {
+      @apply p-0 bg-transparent rounded-none;
+    }
+  }
+
+  blockquote {
+    @apply border-l-[3px] border-border p-4 my-6 italic bg-muted rounded-lg;
+  }
+
+  hr {
+    @apply border-0 border-t border-border my-8;
+  }
+
+  ul, ol {
+    @apply ps-6 mb-4;
+  }
+
+  ul { @apply list-disc; }
+  ol { @apply list-decimal; }
+
+  li { @apply mb-1; }
+
+  table {
+    @apply w-full text-sm mb-6;
+  }
+
+  thead { @apply border-b border-border; }
+
+  th {
+    @apply py-3 px-2 text-left font-medium text-muted-foreground bg-muted;
+  }
+
+  td { @apply py-3 px-2; }
+
+  tbody tr {
+    @apply border-b border-border;
+    &:last-child { @apply border-b-0; }
+  }
+
+  mark {
+    @apply bg-muted p-1 rounded-sm;
+  }
+}
+
+@layer components {
+  .post-content {
+    @apply text-base leading-relaxed;
+
+    h1, h2, h3, h4, h5, h6 {
+      @apply font-serif;
+    }
+
+    p    { @apply mb-6; }
+    code { @apply text-xs; }
+    pre  { @apply my-6; }
+    blockquote { @apply my-8; }
+    hr   { @apply my-10; }
+
+    ul, ol { @apply mb-6; }
+    li     { @apply mb-2; }
+
+    img {
+      @apply my-6 rounded-lg;
+    }
+
+    table { @apply my-6; }
+
+    > *:first-child { @apply mt-0; }
+    > *:last-child  { @apply mb-0; }
+
+    .footnotes {
+      @apply mt-8 pt-4 border-border border-t;
+    }
+  }
+}

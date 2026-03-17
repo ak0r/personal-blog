@@ -1,0 +1,23 @@
+---
+/**
+ * PostItem — a single post row in a list.
+ *
+ * Layout:  Title                    March 2nd
+ *
+ * Date is rendered without year or read time — PostMeta in list mode.
+ * Used by PostList internally.
+ */
+import type { CollectionEntry } from "astro:content";
+import PostMeta from "@/components/PostMeta.astro";
+
+interface Props {
+  post: CollectionEntry<"posts">;
+}
+
+const { post } = Astro.props;
+---
+
+<div class="post-item">
+  <a href={`/posts/${post.id}`} class="post-item-link">{post.data.title}</a>
+  <PostMeta published={post.data.published} />
+</div>

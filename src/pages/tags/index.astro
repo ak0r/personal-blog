@@ -1,0 +1,17 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import SEO from "@/components/SEO.astro";
+import PageHeader from "@/components/PageHeader.astro";
+import TagList from "@/components/TagList.astro";
+import { getAllTags } from "@/utils/content.utils";
+
+// getAllTags returns Map sorted by count desc — sort alphabetically for index
+const tagMap = await getAllTags();
+const tags = [...tagMap.entries()].sort((a, b) => a[0].localeCompare(b[0]));
+---
+
+<BaseLayout>
+  <SEO slot="seo" title="Tags" description="Browse posts by tag" />
+  <PageHeader title="Tags" />
+  <TagList {tags} />
+</BaseLayout>

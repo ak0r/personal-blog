@@ -1,0 +1,34 @@
+---
+import type { CollectionEntry } from "astro:content";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import SEO from "@/components/SEO.astro";
+import PageHeader from "@/components/PageHeader.astro";
+
+interface Props {
+  entry: CollectionEntry<"pages">;
+}
+
+const { entry } = Astro.props;
+const { title, description, updated } = entry.data;
+
+const formattedDate = updated?.toLocaleDateString("en-US", {
+  year: "numeric",
+  month: "long",
+});
+---
+
+<BaseLayout>
+  <SEO slot="seo" {title} description={description ?? ""} />
+
+  <PageHeader slot="header" {title}>
+    {updated && (
+      <span slot="meta">Updated {formattedDate}</span>
+    )}
+  </PageHeader>
+
+  <Fragment slot="content">
+    <slot />
+  </Fragment>
+
+  <!-- navigation and after slots unused for static pages -->
+</BaseLayout>

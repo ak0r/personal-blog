@@ -1,0 +1,27 @@
+---
+import { siteConfig } from "@/site.config";
+import Container from "./Container.astro";
+const contentWidth = siteConfig.pageWidth || 'lg';
+---
+
+<footer class="footer">
+  <Container setWidth={contentWidth}>
+    <div class="footer-inner">
+      <p class="footer-copy">
+        &copy; {new Date().getFullYear()} {siteConfig.author}
+      </p>
+      <nav class="footer-nav" aria-label="Social links">
+        {siteConfig.social.map((item) => (
+          <a
+            href={item.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="nav-link"
+          >
+            {item.title}
+          </a>
+        ))}
+      </nav>
+    </div>
+  </Container>
+</footer>

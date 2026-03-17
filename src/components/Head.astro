@@ -1,0 +1,31 @@
+---
+import { Font } from 'astro:assets';
+import ThemeInit from "@/components/ThemeInit.astro";
+import "@/styles/global.css";
+---
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="generator" content={Astro.generator} />
+
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="/favicon-light.ico" type="image/x-icon" />
+  <link rel="sitemap" href="/sitemap-index.xml" />
+  <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="/rss.xml" />
+
+  <!-- SEO — injected per layout -->
+  <slot name="seo" />
+
+  <!-- Additional per-page head tags -->
+  <slot name="head" />
+
+  <!-- Theme init — must run before body renders, prevents FOUC -->
+  <ThemeInit />
+
+  <!-- Fonts -->
+  <Font cssVariable="--font-headings" preload />
+  <Font cssVariable="--font-primary" preload />
+  <Font cssVariable="--font-secondary" preload />
+  <Font cssVariable="--font-code" preload />
+</head>

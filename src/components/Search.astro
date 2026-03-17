@@ -1,0 +1,68 @@
+---
+/**
+ * Search — Pagefind UI loaded directly from /pagefind/ static assets.
+ *
+ * Both the UI script and CSS come from /pagefind/ (copied to public/ at build).
+ * is:inline loads pagefind-ui.js as a classic browser script, putting
+ * PagefindUI on window — bypasses Vite bundling entirely.
+ */
+---
+
+<link rel="stylesheet" href="/pagefind/pagefind-ui.css" />
+<script is:inline src="/pagefind/pagefind-ui.js"></script>
+
+<div id="pagefind-search" data-pagefind-ui></div>
+
+<script is:inline>
+window.addEventListener("DOMContentLoaded", () => {
+  const container = document.querySelector("#pagefind-search");
+  if (!container || container.dataset.initialized) return;
+  container.dataset.initialized = "true";
+
+  const params = new URLSearchParams(window.location.search);
+
+  const search = new PagefindUI({
+    element: "#pagefind-search",
+    bundlePath: "/pagefind/",
+    showImages: false,
+    showSubResults: true,
+    processTerm(term) {
+      if (term) params.set("q", term);
+      else params.delete("q");
+
+      const qs = params.toString();
+      history.replaceState(history.state, "", qs ? `?${qs}` : location.pathname);
+      return term;
+    }
+  });
+
+  // Restore query from URL
+  const query = params.get("q");
+  if (query) search.triggerSearch(query);
+
+  // Clear URL when search cleared
+  container.addEventListener("input", (e) => {
+    if (
+      e.target.classList?.contains("pagefind-ui__search-input") &&
+      e.target.value.trim() === ""
+    ) {
+      history.replaceState(history.state, "", location.pathname);
+    }
+  });
+});
+</script>
+
+<style>
+  [data-pagefind-ui] {
+    max-width: var(--width-prose);
+    --pagefind-ui-scale: 0.9;
+    --pagefind-ui-primary:       var(--accent);
+    --pagefind-ui-text:          var(--foreground);
+    --pagefind-ui-background:    var(--background);
+    --pagefind-ui-border:        var(--border);
+    --pagefind-ui-border-width:  1px;
+    --pagefind-ui-border-radius: var(--radius);
+    --pagefind-ui-tag:           var(--background-subtle);
+    --pagefind-ui-font:          var(--font-primary);
+  }
+</style>

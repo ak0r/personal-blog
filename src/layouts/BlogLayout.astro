@@ -1,0 +1,80 @@
+---
+import type { CollectionEntry } from "astro:content";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import SEO from "@/components/SEO.astro";
+import PageHeader from "@/components/PageHeader.astro";
+import PostMeta from "@/components/PostMeta.astro";
+import PostItem from "@/components/PostItem.astro";
+import SeriesNav from "@/components/SeriesNav.astro";
+import {
+  getPublishedPosts,
+  getSeriesPosts,
+  getRelatedPosts,
+  calculateReadingTime,
+} from "@/utils/content.utils";
+import { siteConfig } from "@/site.config";
+
+interface Props {
+  entry: CollectionEntry<"posts">;
+}
+
+const { entry } = Astro.props;
+const { title, description, published, tags, cover, series } = entry.data;
+
+const allPosts = await getPublishedPosts();
+const related = getRelatedPosts(entry, allPosts, siteConfig.relatedPosts);
+const seriesPosts = series ? await getSeriesPosts(series) : [];
+const readTime = calculateReadingTime(entry.body ?? "").text;
+---
+
+<BaseLayout>
+  <SEO
+    slot="seo"
+    {title}
+    description={description ?? ""}
+    type="article"
+    publishedTime={published}
+    {tags}
+    image={cover}
+  />
+
+  <PageHeader slot="header" {title} pagefind>
+    <PostMeta slot="meta" {published} {readTime} {tags} />
+  </PageHeader>
+
+  <Fragment>
+    <meta data-pagefind-sort="date[content]" content={published.toISOString()} />
+    <meta data-pagefind-filter="collection[content]" content="posts" />
+    {tags && tags.map((tag) => (
+      <meta data-pagefind-filter="tag[content]" content={tag} />
+    ))}
+    {cover && (
+      <figure class="post-cover">
+        <img src={cover} alt={title} />
+      </figure>
+    )}
+
+    <section class="post-content">
+      <slot />
+    </section>
+  </Fragment>
+
+  <Fragment slot="navigation">
+    {seriesPosts.length > 1 && (
+      <SeriesNav current={entry} posts={seriesPosts} />
+    )}
+  </Fragment>
+
+  <Fragment slot="after">
+    {related.length > 0 && (
+      <aside class="related-posts">
+        <h2>Related</h2>
+        <ul class="related-list">
+          {related.map((post) => (
+            <PostItem {post} />
+          ))}
+        </ul>
+      </aside>
+    )}
+  </Fragment>
+</BaseLayout>

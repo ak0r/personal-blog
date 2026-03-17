@@ -1,0 +1,57 @@
+---
+/**
+ * PostMeta — shared date, read time, and tag meta for posts.
+ *
+ * In list context (PostItem):  date only — "March 2nd"
+ * In post context (BlogLayout): date · read time · #tag #tag
+ *
+ * The default slot allows forks to inject extra meta (e.g. Agrima's type badge).
+ */
+import { ordinalSuffix } from "@/utils/string.utils";
+
+interface Props {
+  published: Date;
+  readTime?: string;
+  tags?: string[];
+}
+
+const { published, readTime, tags } = Astro.props;
+
+const day = published.getDate();
+const month = published.toLocaleDateString("en-US", { month: "long" });
+const year = published.getFullYear();
+
+// List context: "March 2nd" — no year, ordinal day
+// Post context: "March 2nd, 2026" — with year
+const dateShort = `${month} ${ordinalSuffix(day)}`;
+const dateFull  = `${dateShort}, ${year}`;
+
+const showFull = !!readTime || (tags && tags.length > 0);
+---
+
+<div class="post-meta">
+  <time datetime={published.toISOString()}>
+    {showFull ? dateFull : dateShort}
+  </time>
+
+  {readTime && (
+    <>
+      <span class="post-meta-sep" aria-hidden="true">·</span>
+      <span>{readTime}</span>
+    </>
+  )}
+
+  {tags && tags.length > 0 && (
+    <>
+      <span class="post-meta-sep" aria-hidden="true">·</span>
+      <span class="post-meta-tags" aria-label="Tags">
+        {tags.map((tag) => (
+          <a href={`/tags/${tag}`} class="post-tag">#{tag}</a>
+        ))}
+      </span>
+    </>
+  )}
+
+  <!-- Fork extension point — e.g. Agrima injects a type badge here -->
+  <slot />
+</div>

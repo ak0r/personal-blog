@@ -1,0 +1,40 @@
+---
+import type { GetStaticPathsOptions } from "astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import SEO from "@/components/SEO.astro";
+import PageHeader from "@/components/PageHeader.astro";
+import PostList from "@/components/PostList.astro";
+import Pagination from "@/components/Pagination.astro";
+import { getPublishedPosts } from "@/utils/content.utils";
+import { siteConfig } from "@/site.config";
+
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+  const allPosts = await getPublishedPosts();
+  return paginate(allPosts, { pageSize: siteConfig.postsPerPage ?? 20 });
+}
+
+const { page } = Astro.props;
+const isFirst = page.currentPage === 1;
+---
+
+<BaseLayout>
+  <SEO
+    slot="seo"
+    title={isFirst ? "Articles" : `Articles — Page ${page.currentPage}`}
+    description={isFirst ? "All posts" : `Page ${page.currentPage} of ${page.lastPage}`}
+  />
+
+  <PageHeader title="Articles">
+    {page.lastPage > 1 && (
+      <span slot="meta">Page {page.currentPage} of {page.lastPage}</span>
+    )}
+  </PageHeader>
+
+  <PostList posts={page.data} />
+
+  <Pagination
+    currentPage={page.currentPage}
+    lastPage={page.lastPage}
+    url={page.url}
+  />
+</BaseLayout>

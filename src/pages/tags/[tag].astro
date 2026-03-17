@@ -1,0 +1,37 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import SEO from "@/components/SEO.astro";
+import PageHeader from "@/components/PageHeader.astro";
+import PostList from "@/components/PostList.astro";
+import { getPublishedPosts } from "@/utils/content.utils";
+
+export async function getStaticPaths() {
+  const allPosts = await getPublishedPosts();
+  const tags = new Set(allPosts.flatMap((post) => post.data.tags ?? []));
+
+  return [...tags].map((tag) => ({
+    params: { tag },
+    props: {
+      posts: allPosts.filter((post) => post.data.tags?.includes(tag)),
+    },
+  }));
+}
+
+const { tag } = Astro.params;
+const { posts } = Astro.props;
+const postCount = posts.length;
+---
+
+<BaseLayout>
+  <SEO
+    slot="seo"
+    title={tag}
+    description={`${postCount} post${postCount === 1 ? '' : 's'} tagged with ${tag}`}
+  />
+
+  <PageHeader title={`#${tag}`}>
+    <span slot="meta">{postCount} post{postCount === 1 ? '' : 's'}</span>
+  </PageHeader>
+
+  <PostList {posts} />
+</BaseLayout>

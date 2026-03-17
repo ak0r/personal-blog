@@ -1,0 +1,182 @@
+@layer components {
+  .page-container {
+    @apply flex max-w-3xl mx-auto;
+  }
+
+  /* ── Homepage ───────────────────────────────────── */
+  .home-intro {
+    @apply mb-12;
+  }
+
+  .home-section-heading {
+    @apply text-xs font-medium text-secondary-foreground mt-0 mb-6 uppercase tracking-[0.06em];
+  }
+
+  /* ── PostList ───────────────────────────────────── */
+  .year-group {
+    @apply mb-8;
+  }
+
+  .year-heading {
+    @apply text-xl font-medium text-muted-foreground mt-0 mb-3 font-mono;
+  }
+
+  .post-list {
+    @apply list-none p-0 flex flex-col gap-2;
+  }
+
+  /* ── PostItem ───────────────────────────────────── */
+  .post-item {
+    @apply flex flex-row justify-between items-baseline gap-2;
+  }
+
+  .post-item-link {
+    @apply no-underline text-foreground;
+    &:hover { @apply opacity-70; }
+  }
+
+  /* ── PostMeta ───────────────────────────────────── */
+  .post-meta {
+    @apply flex items-center flex-wrap gap-2 text-sm text-muted-foreground;
+  }
+
+  .post-item .post-meta {
+    @apply whitespace-nowrap shrink-0;
+  }
+
+  .post-meta-sep {
+    @apply text-muted-foreground;
+  }
+
+  .post-meta-tags {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .post-tag {
+    @apply no-underline text-muted-foreground;
+    &:hover { @apply text-foreground; }
+  }
+
+  /* ── Header / Nav ───────────────────────────────── */
+  .site-header {
+    @apply sticky top-0 z-[100] border-b border-border bg-background;
+  }
+
+  .site-nav {
+    @apply flex items-center justify-between py-3 gap-4;
+  }
+
+  .brand {
+    font-family: var(--font-headings);
+    @apply text-2xl font-semibold no-underline text-foreground shrink-0;
+    &:hover { @apply opacity-80; }
+    &::after { content: none !important; }
+  }
+
+  .nav-desktop {
+    @apply flex items-center gap-4;
+  }
+
+  .nav-end {
+    @apply flex items-center gap-2;
+  }
+
+  .theme-toggle {
+    @apply inline-flex items-center gap-2 text-muted-foreground transition-colors;
+    &:hover { @apply text-foreground; }
+  }
+
+  .nav-mobile-toggle {
+    @apply hidden text-muted-foreground;
+    &:hover { @apply text-foreground; }
+  }
+
+  .nav-mobile {
+    @apply border-t border-border;
+  }
+
+  .nav-mobile .container {
+    @apply flex flex-col gap-2 py-3;
+  }
+
+  /* Icon visibility: moon in light mode, sun in dark mode */
+  .icon-sun  { @apply hidden; }
+  .icon-moon { @apply block; }
+
+  html.dark .icon-sun  { @apply block; }
+  html.dark .icon-moon { @apply hidden; }
+
+  @media (max-width: 640px) {
+    .nav-desktop       { @apply hidden; }
+    .nav-mobile-toggle { @apply inline-flex; }
+  }
+
+  /* ── Nav links ───────────────────────────────────── */
+  .nav-link {
+    @apply text-sm no-underline text-muted-foreground;
+    &:hover { @apply text-foreground; }
+    &[aria-current="page"] { @apply text-foreground; }
+    &::after { content: none !important; }
+  }
+
+  /* ── Footer ─────────────────────────────────────── */
+  .footer {
+    @apply border-t border-border py-8;
+  }
+
+  .footer-inner {
+    @apply flex items-center justify-between gap-4;
+  }
+
+  .footer-copy {
+    @apply text-xs text-secondary-foreground m-0;
+  }
+
+  .footer-nav {
+    @apply flex gap-4;
+  }
+
+  /* ── Blog post content ───────────────────────────── */
+  .post-cover {
+    @apply mb-8 rounded-lg overflow-hidden;
+  }
+
+  .post-cover img {
+    @apply w-full block;
+  }
+
+  .post-content {
+    @apply mb-10;
+  }
+
+  .related-posts {
+    @apply border-t border-border pt-8 mt-8;
+  }
+
+  .related-posts h2 {
+    @apply text-xl mb-4;
+  }
+
+  .related-list {
+    @apply list-none p-0 flex flex-col gap-3;
+  }
+
+  /* ── TagList ────────────────────────────────────── */
+  .tag-list {
+    @apply flex flex-wrap gap-3;
+  }
+
+  /* ── Tag ────────────────────────────────────────── */
+  .tag {
+    @apply inline-flex items-baseline gap-1 text-sm;
+  }
+
+  .tag-count {
+    @apply text-xs text-muted-foreground;
+  }
+
+  /* ── Expressive Code ─────────────────────────────── */
+  .expressive-code {
+    @apply mb-4
+  }
+}

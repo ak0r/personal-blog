@@ -1,0 +1,78 @@
+---
+/**
+ * Pagination — prev/next navigation for paginated routes.
+ *
+ * Only renders when lastPage > 1.
+ * Accepts the Astro `page` object from [...page].astro.
+ *
+ * Used by: posts/[...page].astro
+ */
+
+interface PaginationUrls {
+  prev?: string;
+  next?: string;
+}
+
+interface Props {
+  currentPage: number;
+  lastPage: number;
+  url: PaginationUrls;
+}
+
+const { currentPage, lastPage, url } = Astro.props;
+
+if (lastPage <= 1) return;
+---
+
+<nav class="pagination" aria-label="Pagination">
+  {url.prev ? (
+    <a href={url.prev} class="pagination-link">← Newer</a>
+  ) : (
+    <span class="pagination-link is-disabled" aria-hidden="true">← Newer</span>
+  )}
+
+  <span class="pagination-info" aria-label={`Page ${currentPage} of ${lastPage}`}>
+    {currentPage} / {lastPage}
+  </span>
+
+  {url.next ? (
+    <a href={url.next} class="pagination-link">Older →</a>
+  ) : (
+    <span class="pagination-link is-disabled" aria-hidden="true">Older →</span>
+  )}
+</nav>
+
+<style>
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 2rem;
+    margin-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .pagination-link {
+    font-size: var(--text-sm);
+    text-decoration: none;
+    color: var(--foreground);
+
+    &:hover {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+
+    &::after { content: none !important; }
+
+    &.is-disabled {
+      color: var(--foreground-subtle);
+      cursor: default;
+      pointer-events: none;
+    }
+  }
+
+  .pagination-info {
+    font-size: var(--text-xs);
+    color: var(--foreground-subtle);
+  }
+</style>
