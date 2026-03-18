@@ -4,6 +4,7 @@ import SEO from "@/components/SEO.astro";
 import ContentHeader from "@/components/ContentHeader.astro";
 import PostList from "@/components/PostList.astro";
 import { getPublishedPosts } from "@/utils/content.utils";
+import Breadcrumb from "@/components/Breadcrumb.astro";
 
 export async function getStaticPaths() {
   const allPosts = await getPublishedPosts();
@@ -28,7 +29,7 @@ const postCount = posts.length;
     title={tag}
     description={`${postCount} post${postCount === 1 ? '' : 's'} tagged with ${tag}`}
   />
-
+  <Breadcrumb />
   <ContentHeader title={`#${tag}`}>
     <span slot="meta">{postCount} post{postCount === 1 ? '' : 's'}</span>
   </ContentHeader>

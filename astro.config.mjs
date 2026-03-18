@@ -4,6 +4,9 @@ import mdx from "@astrojs/mdx";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import expressiveCode from "astro-expressive-code";
+import remarkCallouts from './src/utils/remark-callouts';
+import { remarkObsidianCore } from './src/utils/remark-obsidian-core';
+import { remarkImageProcessing } from './src/utils/remark-image-processing';
 
 // https://astro.build/config
 export default defineConfig({
@@ -84,4 +87,13 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()],
   },
+
+  markdown: {
+    remarkPlugins: [
+      remarkObsidianCore,
+      remarkImageProcessing,
+      remarkCallouts,
+    ],
+  },
+
 });

@@ -1,0 +1,75 @@
+---
+interface Props {
+  label?: string; // override for the last segment
+}
+
+const { label } = Astro.props;
+const pathname = Astro.url.pathname;
+
+interface Crumb {
+  title: string;
+  href: string;
+}
+
+function buildCrumbs(pathname: string, label?: string): Crumb[] {
+  const crumbs: Crumb[] = [{ title: 'Home', href: '/' }];
+
+  if (pathname === '/') return crumbs;
+
+  const segments = pathname.replace(/\/$/, '').split('/').filter(Boolean);
+
+  if (segments[0] === 'posts') {
+    crumbs.push({ title: 'Articles', href: '/posts' });
+    if (segments[1]) {
+      crumbs.push({
+        title: label || segments[1].replace(/-/g, ' '),
+        href: pathname,
+      });
+    }
+  } else if (segments[0] === 'tags') {
+    crumbs.push({ title: 'Tags', href: '/tags' });
+    if (segments[1]) {
+      crumbs.push({
+        title: `#${segments[1]}`,
+        href: pathname,
+      });
+    }
+  } else {
+    // Static pages — /about, /search etc.
+    crumbs.push({
+      title: label || segments[0].replace(/-/g, ' '),
+      href: pathname,
+    });
+  }
+
+  return crumbs;
+}
+
+const crumbs = buildCrumbs(pathname, label);
+---
+
+{crumbs.length > 1 && (
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <ol class="breadcrumb__list">
+      {crumbs.map((crumb, index) => {
+        const isLast = index === crumbs.length - 1;
+        return (
+          <li class="breadcrumb__item">
+            {isLast ? (
+              <span class="breadcrumb__current" aria-current="page">
+                {crumb.title}
+              </span>
+            ) : (
+              <>
+                <a href={crumb.href} class="breadcrumb__link">
+                  {crumb.title}
+                </a>
+                <span class="breadcrumb__sep" aria-hidden="true">/</span>
+              </>
+            )}
+          </li>
+        );
+      })}
+    </ol>
+  </nav>
+)}

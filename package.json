@@ -15,6 +15,7 @@
     "push:release": "git push && git push --tags"
   },
   "dependencies": {
+    "@astrojs/check": "^0.9.8",
     "@astrojs/compiler-rs": "^0.1.4",
     "@astrojs/mdx": "^5.0.0",
     "@astrojs/rss": "^4.0.17",
@@ -24,7 +25,11 @@
     "astro": "^6.0.3",
     "astro-expressive-code": "^0.41.7",
     "glightbox": "^3.3.1",
+    "mdast": "^2.3.2",
     "pagefind": "^1.4.0",
-    "tailwindcss": "^4.2.1"
+    "tailwindcss": "^4.2.1",
+    "typescript": "^5.9.3",
+    "unified": "^11.0.5",
+    "unist-util-visit": "^5.1.0"
   }
 }

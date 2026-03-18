@@ -18,6 +18,7 @@ import Head from "@/components/Head.astro";
 import Header from "@/components/Header.astro";
 import Footer from "@/components/Footer.astro";
 import Container from "@/components/Container.astro";
+import ScrollToTop from '@/components/ScrollToTop.astro';
 
 interface Props {
   lang?: string;
@@ -64,6 +65,8 @@ const contentWidth = setWidth || siteConfig.pageWidth || 'lg';
     <!-- Footer -->
     <Footer />
 
+    <ScrollToTop />
+    
     <!-- Additional page-specific scripts -->
     <slot name="scripts" />
   </body>

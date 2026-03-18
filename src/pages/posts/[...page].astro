@@ -7,6 +7,7 @@ import PostList from "@/components/PostList.astro";
 import Pagination from "@/components/Pagination.astro";
 import { getPublishedPosts } from "@/utils/content.utils";
 import { siteConfig } from "@/site.config";
+import Breadcrumb from "@/components/Breadcrumb.astro";
 
 export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
   const allPosts = await getPublishedPosts();
@@ -23,7 +24,7 @@ const isFirst = page.currentPage === 1;
     title={isFirst ? "Articles" : `Articles — Page ${page.currentPage}`}
     description={isFirst ? "All posts" : `Page ${page.currentPage} of ${page.lastPage}`}
   />
-
+  <Breadcrumb />
   <ContentHeader title="Articles">
     {page.lastPage > 1 && (
       <span slot="meta">Page {page.currentPage} of {page.lastPage}</span>

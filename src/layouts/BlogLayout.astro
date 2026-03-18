@@ -16,6 +16,8 @@ import { getGalleryImages } from '@/utils/image.utils';
 import PostGallery from '@/components/PostGallery.astro';
 import PostCategory from '@/components/PostCategory.astro';
 import { siteConfig } from "@/site.config";
+import GalleryInit from '@/components/GalleryInit.astro';
+import Breadcrumb from '@/components/Breadcrumb.astro';
 
 interface Props {
   entry: CollectionEntry<"posts">;
@@ -43,26 +45,28 @@ const galleryImages = getGalleryImages(entry.filePath);
     {tags}
     image={cover}
   />
-
-  <ContentHeader slot="header" {title} pagefind>
-    <Fragment slot="meta">
-      <PostMeta {published} {readTime} {tags} />
-      {(location || category) && (
-        <div class="post-context">
-          {location && (
-            <span class="post-location">
-              <span aria-hidden="true">📍</span>
-              {location}
-            </span>
-          )}
-          {location && category && (
-            <span class="post-meta-sep" aria-hidden="true">·</span>
-          )}
-          {category && <PostCategory category={category} />}
-        </div>
-      )}
-    </Fragment>
-  </ContentHeader>
+  <Fragment slot="header">
+    <Breadcrumb label={title} />
+    <ContentHeader {title} pagefind>
+      <Fragment slot="meta">
+        <PostMeta {published} {readTime} {tags} />
+        {(location || category) && (
+          <div class="post-context">
+            {location && (
+              <span class="post-location">
+                <span aria-hidden="true">📍</span>
+                {location}
+              </span>
+            )}
+            {location && category && (
+              <span class="post-meta-sep" aria-hidden="true">·</span>
+            )}
+            {category && <PostCategory category={category} />}
+          </div>
+        )}
+      </Fragment>
+    </ContentHeader>
+  </Fragment>
 
   <Fragment>
     <aside data-pagefind-body>
@@ -98,7 +102,7 @@ const galleryImages = getGalleryImages(entry.filePath);
   <Fragment slot="after">
     {related.length > 0 && (
       <aside class="related-posts">
-        <h2>Related</h2>
+        <h2>Related Posts</h2>
         <div class="related-list">
           {related.map((post) => (
             <PostItem {post} />
@@ -107,4 +111,6 @@ const galleryImages = getGalleryImages(entry.filePath);
       </aside>
     )}
   </Fragment>
+  
+  <GalleryInit slot="scripts" />
 </BaseLayout>

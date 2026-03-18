@@ -1,0 +1,68 @@
+---
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  src: ImageMetadata | string;
+  alt: string;
+  width?: number;
+  height?: number;
+  class?: string;
+  loading?: 'lazy' | 'eager';
+  caption?: string;
+  bare?: boolean;
+}
+
+const {
+  src,
+  alt,
+  width = 900,
+  height = 600,
+  class: className,
+  loading = 'lazy',
+  caption,
+  bare = false,
+} = Astro.props;
+
+const isAstroImage = (src: unknown): src is ImageMetadata =>
+  typeof src === 'object' && src !== null && 'src' in src;
+---
+
+{src && bare && (
+  isAstroImage(src) ? (
+    <Picture
+      src={src}
+      alt={alt}
+      width={width}
+      height={height}
+      loading={loading}
+      decoding="async"
+      formats={['avif', 'webp']}
+      class={className}
+    />
+  ) : (
+    <img src={src} alt={alt} loading={loading} class={className} />
+  )
+)}
+
+{src && !bare && (
+  <figure class="post-figure">
+    {isAstroImage(src) ? (
+      <Picture
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        loading={loading}
+        decoding="async"
+        formats={['avif', 'webp']}
+        class={className}
+      />
+    ) : (
+      <img src={src} alt={alt} loading={loading} class={className} />
+    )}
+    {caption && (
+      <figcaption class="post-figure__caption">{caption}</figcaption>
+    )}
+  </figure>
+)}

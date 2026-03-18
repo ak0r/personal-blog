@@ -4,6 +4,7 @@ import SEO from "@/components/SEO.astro";
 import ContentHeader from "@/components/ContentHeader.astro";
 import TagList from "@/components/TagList.astro";
 import { getAllTags } from "@/utils/content.utils";
+import Breadcrumb from '@/components/Breadcrumb.astro';
 
 // getAllTags returns Map sorted by count desc — sort alphabetically for index
 const tagMap = await getAllTags();
@@ -12,6 +13,7 @@ const tags = [...tagMap.entries()].sort((a, b) => a[0].localeCompare(b[0]));
 
 <BaseLayout>
   <SEO slot="seo" title="Tags" description="Browse posts by tag" />
+  <Breadcrumb />
   <ContentHeader title="Tags" />
   <TagList {tags} />
 </BaseLayout>

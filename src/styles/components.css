@@ -281,7 +281,7 @@
   }
 
   .related-posts {
-    @apply border-t border-border pt-8 mt-8;
+    @apply flex flex-col border-t border-border pt-8 mt-8 gap-4;
   }
 
   .related-posts h2 {
@@ -334,58 +334,6 @@
 
   .post-location {
     @apply flex items-center gap-1;
-  }
-
-  /* ── GalleryImage ────────────────────────────────── */
-  .gallery-item {
-    @apply block overflow-hidden border border-border bg-background-subtle cursor-zoom-in rounded-sm aspect-3/2;
-  }
-
-  .gallery-item:hover {
-    @apply border border-border;
-  }
-
-  .gallery-item:focus-visible {
-    @apply outline-none ;
-    outline: 2px solid var(--color-focus);
-    outline-offset: 2px;
-  }
-
-  .gallery-item__image {
-    @apply w-full h-full object-cover block transition-transform;
-    transition: transform 0.2s ease;
-  }
-
-  .gallery-item:hover .gallery-item__image {
-    transform: scale(1.03);
-  }
-
-  /* ── PostGallery ─────────────────────────────────── */
-  .post-gallery {
-    @apply mt-8 pt-6 border-border border-t ;
-  }
-
-  .post-gallery__header {
-    @apply flex items-baseline gap-3 mb-4;
-  }
-
-  .post-gallery__title {
-    @apply text-lg font-semibold text-foreground m-0;
-  }
-
-  .post-gallery__count {
-    @apply text-sm text-foreground-subtle;
-  }
-
-  .post-gallery__grid {
-    @apply grid gap-2;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  }
-
-  @media (max-width: 480px) {
-    .post-gallery__grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
   }
 
   /* Override GLightbox hardcoded description background */
@@ -456,5 +404,179 @@
 
   .bg-coral {
       background-color: #ebcece!important
+  }
+
+  /* ── Gallery (shared by PostGallery and inline images) ── */
+  .gallery-grid {
+    @apply grid gap-2 my-6;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  .gallery-single {
+    @apply my-6;
+  }
+
+  .gallery-item {
+    @apply block overflow-hidden border border-border
+           bg-background-subtle cursor-zoom-in rounded-sm;
+  }
+
+  .gallery-item__image {
+    @apply w-full h-full object-cover block aspect-3/2;
+    transition: transform 0.2s ease;
+  }
+
+  .gallery-item:hover .gallery-item__image {
+    transform: scale(1.03);
+  }
+
+  .gallery-item:focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+
+  @media (max-width: 480px) {
+    .gallery-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  /* ── PostGallery section header ─────────────────── */
+  .post-gallery {
+    @apply mt-8 pt-6 border-border border-t;
+  }
+
+  .post-gallery__header {
+    @apply flex items-baseline gap-3 mb-4;
+  }
+
+  .post-gallery__title {
+    @apply text-lg font-semibold text-foreground m-0;
+  }
+
+  .post-gallery__count {
+    @apply text-sm text-foreground-subtle;
+  }
+
+  /* ── ImageWrapper ────────────────────────────────── */
+  .post-figure {
+    @apply my-6;
+  }
+
+  .post-figure__caption {
+    @apply mt-2 text-sm text-center text-foreground-subtle leading-snug;
+  }
+
+  /* ── Callouts ────────────────────────────────────── */
+  .callout {
+    @apply rounded-md border border-border my-6 overflow-hidden;
+  }
+
+  .callout__title {
+    @apply flex items-center gap-2 px-4 py-3 font-medium text-sm;
+  }
+
+  .callout__icon {
+    @apply shrink-0;
+  }
+
+  .callout__label {
+    @apply flex-1;
+  }
+
+  .callout__toggle {
+    @apply ml-auto shrink-0 text-foreground-subtle cursor-pointer;
+  }
+
+  .callout__toggle-icon {
+    @apply transition-transform duration-200;
+  }
+
+  .callout--collapsed .callout__toggle-icon {
+    @apply rotate-180;
+  }
+
+  .callout__content {
+    @apply px-4 py-3 text-sm border-t border-border;
+  }
+
+  .callout-note {
+    border-color: color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+  .callout-note .callout__title {
+    background: var(--accent-minimal);
+    color: var(--accent);
+  }
+
+  .callout-tip {
+    border-color: color-mix(in srgb, var(--color-olive) 30%, transparent);
+  }
+  .callout-tip .callout__title {
+    background: color-mix(in srgb, var(--color-olive) 10%, transparent);
+    color: var(--color-olive);
+  }
+
+  .callout-important {
+    border-color: color-mix(in srgb, var(--color-sky) 30%, transparent);
+  }
+  .callout-important .callout__title {
+    background: color-mix(in srgb, var(--color-sky) 10%, transparent);
+    color: var(--color-sky);
+  }
+
+  .callout-warning {
+    border-color: color-mix(in srgb, var(--color-clay) 30%, transparent);
+  }
+  .callout-warning .callout__title {
+    background: color-mix(in srgb, var(--color-clay) 10%, transparent);
+    color: var(--color-clay);
+  }
+
+  .callout-caution {
+    border-color: color-mix(in srgb, var(--color-error) 30%, transparent);
+  }
+  .callout-caution .callout__title {
+    background: color-mix(in srgb, var(--color-error) 10%, transparent);
+    color: var(--color-error);
+  }
+
+  /* ── Breadcrumb ──────────────────────────────────── */
+  .breadcrumb {
+    @apply mb-4;
+  }
+
+  .breadcrumb__list {
+    @apply flex items-center flex-wrap gap-1 list-none p-0 m-0;
+  }
+
+  .breadcrumb__item {
+    @apply flex items-center gap-1 text-sm text-foreground-subtle;
+  }
+
+  .breadcrumb__link {
+    @apply text-foreground-subtle no-underline;
+    &:hover { @apply text-foreground; }
+    &::after { content: none !important; }
+  }
+
+  .breadcrumb__sep {
+    @apply text-foreground-minimal select-none;
+  }
+
+  .breadcrumb__current {
+    @apply text-foreground-subtle capitalize;
+  }
+
+  /* ── Scroll To Top ───────────────────────────────── */
+  .scroll-to-top {
+    @apply fixed bottom-6 right-6 z-50
+          flex items-center justify-center
+          w-9 h-9 rounded-full
+          bg-background border border-border
+          text-foreground-subtle
+          shadow-sm cursor-pointer
+          transition-opacity duration-200;
+    &:hover { @apply text-foreground border-border-subtle; }
+    &[hidden] { @apply hidden; }
   }
 }

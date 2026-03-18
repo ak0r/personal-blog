@@ -22,20 +22,20 @@
   }
 
   a {
-    @apply text-foreground underline-offset-2 transition-opacity duration-300;
+    @apply text-accent underline-offset-2 transition-opacity duration-300;
     &:hover { @apply opacity-70; }
   }
 
-  a[href^="http"],
-  a[href^="https"] {
-    @apply underline decoration-dotted;
-  }
-
   /* External link indicator */
-  a[href^="http"]::after,
-  a[href^="https"]::after {
+  a[href^="http"]:not(.glightbox)::after,
+  a[href^="https"]:not(.glightbox)::after {
     content: " ↗";
     @apply align-super text-xs;
+  }
+
+  a[href^="http"]:not(.glightbox),
+  a[href^="https"]:not(.glightbox) {
+    @apply underline decoration-dotted;
   }
 
   strong, b { @apply font-semibold; }
@@ -100,7 +100,7 @@
       @apply font-serif;
     }
 
-    p    { @apply mb-6; }
+    p    { @apply mb-2; }
     code { @apply text-xs; }
     pre  { @apply my-6; }
     blockquote { @apply my-8; }
@@ -110,7 +110,7 @@
     li     { @apply mb-2; }
 
     img {
-      @apply my-6 rounded-lg;
+      @apply rounded-md;
     }
 
     table { @apply my-6; }

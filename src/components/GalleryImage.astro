@@ -7,7 +7,7 @@
  * GLightbox picks up the `data-gallery` attribute and `href` for the full-size view.
  */
 
-import { Image } from 'astro:assets';
+import ImageWrapper from '@/components/ImageWrapper.astro';
 import type { GalleryImage } from '@/utils/image.utils';
 
 interface Props {
@@ -25,13 +25,13 @@ const { image, galleryId } = Astro.props;
   data-description={image.alt}
   aria-label={image.alt}
 >
-  <Image
+  <ImageWrapper
     src={image.src}
     alt={image.alt}
     width={480}
     height={320}
     class="gallery-item__image"
     loading="lazy"
-    decoding="async"
+    bare
   />
 </a>
