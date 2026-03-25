@@ -2,6 +2,9 @@
 import { Font } from 'astro:assets';
 import ThemeInit from "@/components/ThemeInit.astro";
 import "@/styles/global.css";
+
+const isProd = import.meta.env.PROD;
+const cfAnalyticsToken = import.meta.env.CF_ANALYTICS_TOKEN;
 ---
 
 <head>
@@ -28,4 +31,13 @@ import "@/styles/global.css";
   <Font cssVariable="--font-primary" preload />
   <Font cssVariable="--font-secondary" preload />
   <Font cssVariable="--font-code" preload />
+
+  <!-- Cloudflare Web Analytics — production only -->
+  <!-- {isProd && cfAnalyticsToken && (
+    <script
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon={`{"token": "${cfAnalyticsToken}"}`}
+    />
+  )} -->
 </head>

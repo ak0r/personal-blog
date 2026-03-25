@@ -15,7 +15,7 @@ const recent = allPosts.slice(0, siteConfig.recentPosts);
 ---
 
 <BaseLayout>
-  <SEO slot="seo" title="Home" description={siteConfig.description} />
+  <SEO slot="seo" title="Home" description={siteConfig.description} ogImage="/og/default.png" />
   <SchemaOrg slot="seo" type="website" />
 
   <h1 class="sr-only">{siteConfig.title}</h1>

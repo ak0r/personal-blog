@@ -4,6 +4,53 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.5.0 - 2026-03-25
+
+### Added
+
+- **Primitive CSS system** (`primitives.css`) — three composable design primitives:
+  - `.badge` — inline label with `--subtle`, `--outline`, `--ghost` variants and `--accent`, `--olive`, `--sky`, `--clay` color modifiers
+  - `.btn` — interactive element with `--ghost`, `--subtle`, `--solid` variants and `--sm`, `--md`, `--icon` sizes; `rounded-full` throughout
+  - `.card` — surface primitive with `--interactive` (hover: `bg-background-minimal` + `shadow-sm`), `--flat`, and `--padded` modifiers; borderless at rest
+- **CSS split into three layers**: `primitives.css` (design primitives), `layout.css` (site chrome), `components.css` (content layer); import order updated in `global.css`
+- **Header scroll shadow** — pure CSS via `animation-timeline: scroll()` + `animation-range: 0px 1px`; no JS scroll listener
+- **Mobile menu fixes** — hamburger hidden on desktop via `#nav-toggle { display: none }` / shown at `max-width: 640px`; slide-down entrance animation; touch-target sized nav links (`py-2.5 px-3 rounded-lg`); closes on nav link click, on resize to desktop, and on `astro:after-swap`
+- **`SchemaOrg.astro`** — JSON-LD structured data component supporting three types:
+  - `BlogPosting` — used in `BlogLayout`; includes `headline`, `datePublished`, `dateModified`, `author`, `publisher`, `inLanguage`, `keywords`, `mainEntityOfPage`
+  - `BreadcrumbList` — rendered inside `Breadcrumb.astro` from shared crumb data
+  - `WebSite` with `SearchAction` — used on homepage; points to Pagefind `/search` route
+- **`breadcrumb.utils.ts`** — `Crumb` type and `buildCrumbs()` extracted from `Breadcrumb.astro`; shared between visual breadcrumb and JSON-LD schema
+- **`lang` frontmatter field** — `z.string().optional()` added to both `post.schema.ts` and `page.schema.ts`; BCP 47 language tag (e.g. `en`, `mr`, `hi`); used by `BlogPosting` schema `inLanguage` field, defaults to `'en'`
+- **Cloudflare Web Analytics** — beacon script added to `Head.astro`; production-only guard via `import.meta.env.PROD && CF_ANALYTICS_TOKEN`; token loaded from `.env.production` via `CF_ANALYTICS_TOKEN` env var
+- **Dynamic OG images** via `astro-og-canvas`:
+  - `src/pages/og/posts/[...slug].ts` — per-post OG images at `/og/posts/{id}.png`; uses `import.meta.glob` for Astro 6 compatibility; category-aware left border (olive for travel, sky for tech, accent teal for default); light slate-050 background
+  - `src/pages/og/[page].png.ts` — static page OG images at `/og/default.png`, `/og/posts.png`, `/og/tags.png`, `/og/about.png`, `/og/search.png`
+
+### Changed
+
+- `Tag.astro` — uses `.badge.badge--ghost.badge--accent` instead of ad-hoc `.tag` styles
+- `PostCategory.astro` — uses `.badge.badge--subtle.badge--{olive|sky}` with `colorMap`; travel maps to `badge--clay` (updated), tech maps to `badge--sky`
+- `PostItem.astro` — wrapper changed to `.card.card--interactive.card--padded.post-item`; `post-item-link` renamed to `post-item__link` for BEM consistency
+- `Header.astro` — theme toggle and mobile menu toggle use `.btn.btn--ghost.btn--icon`; mobile toggle renders SVG hamburger icon instead of `☰` character; mobile dropdown inner wrapper changed from `<div class="container">` to `<div class="site-header__mobile-inner">`; JS script wrapped in `initMobileNav()` function with `astro:after-swap` re-initialisation
+- `SeriesNav.astro` — `.series-nav__list` uses `bg-background-subtle rounded-lg` inset card treatment instead of `border-t border-border`; outer border retained; `rounded-md` → `rounded-lg`
+- `Breadcrumb.astro` — imports `buildCrumbs()` from `breadcrumb.utils.ts`; renders `SchemaOrg type="breadcrumb"` inline
+- `BlogLayout.astro` — adds `SchemaOrg type="article"`; passes `ogImage="/og/posts/${entry.id}.png"` to `SEO`; cover image retained as display-only via `image` prop
+- `SEO.astro` — new `ogImage` prop takes priority over `image` for OG/Twitter tags; fallback chain: `ogImage → image → /og/default.png`
+- `index.astro` — adds `SchemaOrg type="website"`; explicit `ogImage="/og/default.png"` passed to SEO
+- `astro.config.mjs` — CSP updated: `script-src` adds `https://static.cloudflareinsights.com`; `connect-src` adds `https://cloudflareinsights.com`
+- `layout.css` — header scroll shadow via `@keyframes header-shadow` + `animation-timeline: scroll()`; mobile menu entrance via `@keyframes mobile-menu-in`; hamburger visibility via `#nav-toggle` ID selector; mobile nav link styles with proper touch targets and active state
+- `components.css` — `series-nav__list` drops `border-t` in favour of inset surface; `.series-nav` border-radius updated to `rounded-lg`
+
+### Removed
+
+- `PageHeader.astro` reference styles (superseded in 0.2.0, now fully absent from CSS)
+- `.tag` ad-hoc styles (replaced by `.badge` primitive)
+- `.post-category-tag` and `.post-category-tag--{travel|tech}` (replaced by `.badge--subtle` + color modifiers)
+- `.theme-toggle` standalone class (replaced by `.btn.btn--ghost.btn--icon`)
+- `.site-header__mobile-toggle` standalone class (replaced by `.btn.btn--ghost.btn--icon` + ID-based visibility)
+- `.card` single-line stub `@apply p-2` (replaced by full `.card` primitive system)
+- `astro-og-canvas` `cacheDir`-dependent default OG endpoint (removed; replaced by `[page].png.ts` static pages map)
+
 ## 0.3.0 - 2026-03-18
 
 ### Added

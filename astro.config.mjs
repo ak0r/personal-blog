@@ -22,11 +22,13 @@ export default defineConfig({
       directives: {
         // 'self' covers same-origin scripts including /pagefind/pagefind-ui.js
         // Astro auto-nonces is:inline scripts when CSP is enabled
-        "script-src": ["'self'"],
+        // Cloudflare Web Analytics beacon scrip
+        "script-src": ["'self'", "https://static.cloudflareinsights.com"],
         // 'unsafe-inline' needed for Pagefind UI's dynamically injected result styles
         "style-src": ["'self'", "'unsafe-inline'"],
         // Pagefind fetches the search index via XHR
-        "connect-src": ["'self'"],
+        // Cloudflare Analytics reports back to cloudflareinsights.com
+        "connect-src": ["'self'", "https://cloudflareinsights.com"],
         // Pagefind uses a Web Worker for indexing
         "worker-src": ["'self'", "blob:"],
       },

@@ -1,7 +1,7 @@
 {
   "name": "astro-base",
   "type": "module",
-  "version": "0.3.0",
+  "version": "0.5.0",
   "engines": {
     "node": ">=22.12.0"
   },
@@ -22,6 +22,7 @@
     "@astrojs/sitemap": "^3.7.1",
     "@pagefind/default-ui": "^1.4.0",
     "@tailwindcss/vite": "^4.2.1",
+    "@vercel/og": "^0.11.1",
     "astro": "^6.0.3",
     "astro-expressive-code": "^0.41.7",
     "glightbox": "^3.3.1",

@@ -31,8 +31,10 @@ const allPosts = await getPublishedPosts();
 const related = getRelatedPosts(entry, allPosts, siteConfig.relatedPosts);
 const seriesPosts = series ? await getSeriesPosts(series) : [];
 const readTime = calculateReadingTime(entry.body ?? "").text;
-
 const galleryImages = getGalleryImages(entry.filePath);
+
+// Generated OG image — cover stays as display image only
+const ogImage = `/og/posts/${entry.id}.png`;
 ---
 
 <BaseLayout>
@@ -44,6 +46,7 @@ const galleryImages = getGalleryImages(entry.filePath);
     publishedTime={published}
     {tags}
     image={cover}
+    {ogImage}
   />
   <SchemaOrg slot="seo" type="article" {entry} />
 
