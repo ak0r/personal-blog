@@ -7,7 +7,6 @@ import { baseSchema } from './base.schema';
  */
 export const postSchema = baseSchema.extend({
   category: z.enum(['tech', 'travel']).optional(),
-  published: z.coerce.date(),
   cover: z.string().optional(),
   tags: z.array(z.string()).optional(),
   location: z.string().optional(),

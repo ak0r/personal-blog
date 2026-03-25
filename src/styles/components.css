@@ -18,7 +18,7 @@
   }
 
   .year-heading {
-    @apply text-xl font-medium text-foreground-subtle mt-0 mb-3 font-mono;
+    @apply text-xl md:text-2xl font-bold text-foreground-subtle mt-0 mb-4 font-mono;
   }
 
   .post-list {
@@ -27,12 +27,16 @@
 
   /* ── PostItem ───────────────────────────────────── */
   .post-item {
-    @apply flex flex-row justify-between items-baseline gap-2;
+    @apply flex flex-row items-baseline gap-2 justify-between;
   }
 
   .post-item-link {
-    @apply no-underline text-foreground;
+    @apply no-underline text-foreground justify-start text-base md:text-lg;
     &:hover { @apply opacity-70; }
+  }
+
+  .post-item__meta {
+    @apply flex flex-row gap-2 md:gap-4 justify-end;
   }
 
   /* ── PostMeta ───────────────────────────────────── */
@@ -418,11 +422,11 @@
 
   .gallery-item {
     @apply block overflow-hidden border border-border
-           bg-background-subtle cursor-zoom-in rounded-sm;
+           bg-background-subtle cursor-zoom-in rounded-md shadow-md;
   }
 
   .gallery-item__image {
-    @apply w-full h-full object-cover block aspect-3/2;
+    @apply w-full h-full object-cover block aspect-3/2 rounded-md border border-border;
     transition: transform 0.2s ease;
   }
 
@@ -578,5 +582,9 @@
           transition-opacity duration-200;
     &:hover { @apply text-foreground border-border-subtle; }
     &[hidden] { @apply hidden; }
+  }
+
+  .card {
+    @apply p-2;
   }
 }
