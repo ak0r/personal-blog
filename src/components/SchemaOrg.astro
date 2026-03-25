@@ -1,0 +1,125 @@
+---
+/**
+ * SchemaOrg.astro
+ *
+ * Renders JSON-LD structured data for search engine rich results.
+ * Place in <head> via the `seo` slot in BaseLayout.
+ *
+ * Supported types:
+ *   - 'article'    → BlogPosting — use in BlogLayout
+ *   - 'breadcrumb' → BreadcrumbList — use in Breadcrumb.astro
+ *   - 'website'    → WebSite + SearchAction — use on homepage
+ *
+ * Usage:
+ *   <SchemaOrg type="article" {entry} slot="seo" />
+ *   <SchemaOrg type="breadcrumb" crumbs={crumbs} />
+ *   <SchemaOrg type="website" slot="seo" />
+ */
+
+import type { CollectionEntry } from 'astro:content';
+import { siteConfig } from '@/site.config';
+import type { Crumb } from '@/utils/breadcrumb.utils';
+
+type SchemaType = 'article' | 'breadcrumb' | 'website';
+
+interface Props {
+  type: SchemaType;
+  // article
+  entry?: CollectionEntry<'posts'>;
+  // breadcrumb
+  crumbs?: Crumb[];
+}
+
+const { type, entry, crumbs } = Astro.props;
+
+const siteUrl = siteConfig.url.replace(/\/$/, '');
+
+// ── Person — reused across article and website ───────────────────────────────
+
+const person = {
+  '@type': 'Person',
+  name: siteConfig.author,
+  url: siteUrl,
+};
+
+// ── Schema builders ──────────────────────────────────────────────────────────
+
+function buildArticle(entry: CollectionEntry<'posts'>) {
+  const { title, description, published, cover, tags, lang } = entry.data;
+  const canonicalUrl = new URL(`/posts/${entry.id}`, siteUrl).href;
+  const imageUrl = cover
+    ? new URL(cover, siteUrl).href
+    : new URL('/og-default.png', siteUrl).href;
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: title,
+    ...(description && { description }),
+    datePublished: published.toISOString(),
+    dateModified: published.toISOString(),
+    url: canonicalUrl,
+    image: imageUrl,
+    inLanguage: lang ?? 'en',
+    ...(tags?.length && { keywords: tags.join(', ') }),
+    author: person,
+    publisher: person,
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': canonicalUrl,
+    },
+  };
+}
+
+function buildBreadcrumb(crumbs: Crumb[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: crumbs.map((crumb, index) => {
+      const isLast = index === crumbs.length - 1;
+      return {
+        '@type': 'ListItem',
+        position: index + 1,
+        name: crumb.title,
+        // Omit `item` on the last crumb — current page per Google spec
+        ...(!isLast && { item: new URL(crumb.href, siteUrl).href }),
+      };
+    }),
+  };
+}
+
+function buildWebsite() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: siteConfig.title,
+    description: siteConfig.description,
+    url: siteUrl,
+    author: person,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${siteUrl}/search?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+}
+
+// ── Resolve schema ───────────────────────────────────────────────────────────
+
+let schema: Record<string, unknown> | null = null;
+
+if (type === 'article' && entry) {
+  schema = buildArticle(entry);
+} else if (type === 'breadcrumb' && crumbs && crumbs.length > 1) {
+  schema = buildBreadcrumb(crumbs);
+} else if (type === 'website') {
+  schema = buildWebsite();
+}
+---
+
+{schema && (
+  <script type="application/ld+json" set:html={JSON.stringify(schema, null, 2)} />
+)}

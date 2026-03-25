@@ -8,6 +8,7 @@ import { baseSchema } from './base.schema';
  */
 export const pageSchema = baseSchema.extend({
   updated: z.coerce.date().optional(),
+  lang: z.string().optional(), // BCP 47 language tag e.g. 'en', 'mr', 'hi'
 });
 
 export type Page = z.infer<typeof pageSchema>;

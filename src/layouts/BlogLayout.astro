@@ -2,6 +2,7 @@
 import type { CollectionEntry } from "astro:content";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import SEO from "@/components/SEO.astro";
+import SchemaOrg from "@/components/SchemaOrg.astro";
 import ContentHeader from "@/components/ContentHeader.astro";
 import PostMeta from "@/components/PostMeta.astro";
 import PostItem from "@/components/PostItem.astro";
@@ -31,7 +32,6 @@ const related = getRelatedPosts(entry, allPosts, siteConfig.relatedPosts);
 const seriesPosts = series ? await getSeriesPosts(series) : [];
 const readTime = calculateReadingTime(entry.body ?? "").text;
 
-// Fetch images from post-1/gallery directory
 const galleryImages = getGalleryImages(entry.filePath);
 ---
 
@@ -45,6 +45,8 @@ const galleryImages = getGalleryImages(entry.filePath);
     {tags}
     image={cover}
   />
+  <SchemaOrg slot="seo" type="article" {entry} />
+
   <Fragment slot="header">
     <Breadcrumb label={title} />
     <ContentHeader {title} pagefind>
@@ -86,7 +88,7 @@ const galleryImages = getGalleryImages(entry.filePath);
       <section class="post-content" role="article">
         <slot />
       </section>
-      
+
       {galleryImages.length > 0 && (
         <PostGallery images={galleryImages} galleryId={entry.id} />
       )}
@@ -111,6 +113,6 @@ const galleryImages = getGalleryImages(entry.filePath);
       </aside>
     )}
   </Fragment>
-  
+
   <GalleryInit slot="scripts" />
 </BaseLayout>

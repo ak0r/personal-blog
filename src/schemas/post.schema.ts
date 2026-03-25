@@ -3,7 +3,6 @@ import { baseSchema } from './base.schema';
 
 /**
  * Post schema — extends base with content-specific fields.
- * published is required — every post must have a date.
  */
 export const postSchema = baseSchema.extend({
   category: z.enum(['tech', 'travel']).optional(),
@@ -12,6 +11,7 @@ export const postSchema = baseSchema.extend({
   location: z.string().optional(),
   series: z.string().optional(),
   order: z.number().optional(),
+  lang: z.string().optional(), // BCP 47 language tag e.g. 'en', 'mr', 'hi'
 });
 
 export type Post = z.infer<typeof postSchema>;
