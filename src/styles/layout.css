@@ -1,7 +1,7 @@
 @layer components {
   /* ── Header / Nav ───────────────────────────────── */
   .site-header {
-    @apply sticky top-0 z-[100] border-b border-border-subtle bg-background;
+    @apply sticky top-0 z-50 isolate border-b border-border-subtle bg-background;
 
     /* Scroll shadow via animation-timeline — appears after ~1px scroll */
     animation: header-shadow linear both;
@@ -14,15 +14,39 @@
     to   { box-shadow: 0 1px 12px 0 color-mix(in srgb, var(--foreground) 8%, transparent); }
   }
 
+  /* Reading progress — thin line pinned below the sticky header */
+  .site-header::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--color-accent);
+    transform-origin: left;
+    transform: scaleX(0);
+    animation: reading-progress linear;
+    animation-timeline: scroll();
+  }
+
+  @keyframes reading-progress {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+
   .site-header__nav {
     @apply flex items-center justify-between py-3 gap-4;
   }
 
   .site-header__brand {
     font-family: var(--font-headings);
-    @apply text-2xl font-semibold no-underline text-foreground shrink-0;
+    @apply text-2xl font-semibold no-underline text-foreground shrink-0 flex justify-start;
     &:hover { @apply opacity-80; }
     &::after { content: none !important; }
+  }
+
+  .site-header__logo {
+    @apply w-auto block;
   }
 
   .site-header__desktop {
@@ -73,10 +97,18 @@
 
   /* ── Nav links ───────────────────────────────────── */
   .nav-link {
-    @apply text-sm no-underline text-foreground-subtle;
+    @apply text-sm no-underline text-foreground-subtle relative;
     &:hover { @apply text-foreground; }
-    &[aria-current="page"] { @apply text-foreground; }
+    &[aria-current="page"] {
+      @apply text-foreground font-medium;
+      &::after {
+        content: '';
+        @apply absolute -bottom-0.5 left-0 right-0 h-0.5 rounded-full;
+        background: var(--accent);
+      }
+    }
     &::after { content: none !important; }
+    &[aria-current="page"]::after { content: '' !important; }
   }
 
   /* ── Footer ─────────────────────────────────────── */
@@ -120,7 +152,7 @@
 
   /* ── Breadcrumb ──────────────────────────────────── */
   .breadcrumb {
-    @apply mb-8 font-mono;
+    @apply mb-4;
   }
 
   .breadcrumb__list {
@@ -142,7 +174,7 @@
   }
 
   .breadcrumb__current {
-    @apply text-foreground-subtle font-bold;
+    @apply text-foreground-subtle capitalize;
   }
 
   /* ── Scroll To Top ───────────────────────────────── */
@@ -158,5 +190,14 @@
       @apply text-foreground border-border-subtle shadow-md -translate-y-0.5;
     }
     &[hidden] { @apply hidden; }
+
+    animation: scroll-to-top-fade linear both;
+    animation-timeline: scroll();
+    animation-range: 0px 300px;
+  }
+
+  @keyframes scroll-to-top-fade {
+    from { opacity: 0; pointer-events: none; }
+    to   { opacity: 1; pointer-events: auto; }
   }
 }

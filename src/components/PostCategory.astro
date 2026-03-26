@@ -2,13 +2,11 @@
 /**
  * PostCategory.astro
  *
- * Reusable category pill for post listings and post headers.
+ * Category badge — rendered in the post eyebrow above the title.
  * Renders nothing if category is undefined.
- *
- * Usage:
- *   import PostCategory from '@/components/PostCategory.astro';
- *   <PostCategory category={post.data.category} />
  */
+
+import Icon from '@/components/Icon.astro';
 
 interface Props {
   category?: 'tech' | 'travel';
@@ -17,16 +15,22 @@ interface Props {
 const { category } = Astro.props;
 
 const colorMap: Record<string, string> = {
-  travel: 'badge--clay',
+  travel: 'badge--olive',
   tech:   'badge--sky',
+};
+
+const iconMap: Record<string, 'compass' | 'cpu'> = {
+  travel: 'compass',
+  tech:   'cpu',
 };
 ---
 
 {category && (
   <span
-    class={`badge badge--subtle ${colorMap[category]}`}
+    class={`badge badge--subtle badge--category ${colorMap[category]}`}
     aria-label={`Content category: ${category}`}
   >
+    <Icon name={iconMap[category]} size={13} />
     {category}
   </span>
 )}

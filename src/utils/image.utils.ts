@@ -1,11 +1,16 @@
 /**
  * Image Utilities
  *
- * Gallery image resolution for folder-based post structure.
- * Reads from src/content/posts/{postDir}/gallery/
+ * Gallery image resolution and cover image resolution for
+ * folder-based post structure.
+ *
+ * Reads from:
+ *   src/content/posts/{postDir}/gallery/      — dedicated gallery images
+ *   src/content/posts/{postDir}/attachments/  — inline and cover images
  */
 
 import type { ImageMetadata } from 'astro';
+import { stripObsidianBrackets } from '@/utils/string.utils';
 
 // ============================================================================
 // TYPES
@@ -18,11 +23,16 @@ export interface GalleryImage {
 }
 
 // ============================================================================
-// GLOB — static, module-level, Vite requires a static pattern
+// GLOBS — static, module-level, Vite requires static patterns
 // ============================================================================
 
 const allGalleryImages = import.meta.glob<{ default: ImageMetadata }>(
   '/src/content/posts/**/gallery/*.{jpg,jpeg,png,webp,avif,gif,JPG,JPEG,PNG,WEBP}',
+  { eager: true }
+);
+
+const allAttachmentImages = import.meta.glob<{ default: ImageMetadata }>(
+  '/src/content/posts/**/attachments/*.{jpg,jpeg,png,webp,avif,gif,JPG,JPEG,PNG,WEBP}',
   { eager: true }
 );
 
@@ -56,7 +66,6 @@ export function filenameToAlt(filename: string): string {
 
 /**
  * Shuffle array — Fisher-Yates
- * Use when display order should be randomised
  */
 export function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
@@ -67,16 +76,54 @@ export function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
+/**
+ * Resolve a vault-absolute image path to a glob key.
+ *
+ * Handles:
+ *   posts/2011-03-21-bhuleshwar/attachments/image.jpg
+ *   → /src/content/posts/2011-03-21-bhuleshwar/attachments/image.jpg
+ */
+function vaultPathToGlobKey(vaultPath: string): string {
+  // Already a glob key
+  if (vaultPath.startsWith('/src/content/')) return vaultPath;
+  // Vault-absolute: posts/...
+  if (vaultPath.startsWith('posts/')) return `/src/content/${vaultPath}`;
+  // Fallback
+  return `/src/content/posts/${vaultPath}`;
+}
+
+// ============================================================================
+// COVER IMAGE
+// ============================================================================
+
+/**
+ * Resolve a post's cover frontmatter value to ImageMetadata.
+ *
+ * Accepts vault-absolute Obsidian paths with or without [[ ]] brackets:
+ *   [[posts/2011-03-21-bhuleshwar/attachments/image.jpg]]
+ *   posts/2011-03-21-bhuleshwar/attachments/image.jpg
+ *
+ * Returns undefined if the path cannot be resolved (allows graceful fallback).
+ */
+export function getCoverImage(raw: string | undefined): ImageMetadata | undefined {
+  if (!raw) return undefined;
+
+  const stripped = stripObsidianBrackets(raw).trim();
+  if (!stripped) return undefined;
+
+  const globKey = vaultPathToGlobKey(stripped);
+
+  const mod = allAttachmentImages[globKey];
+  return mod?.default;
+}
+
 // ============================================================================
 // GALLERY
 // ============================================================================
 
 /**
- * Get gallery images for a post, sorted by filename
+ * Get gallery images for a post, sorted by filename.
  * Reads from src/content/posts/{postDir}/gallery/
- * Returns empty array if directory does not exist or has no images
- *
- * @param filePath - entry.filePath from Astro content collection entry
  */
 export function getGalleryImages(filePath: string): GalleryImage[] {
   const postDir = extractPostDir(filePath);
@@ -96,9 +143,7 @@ export function getGalleryImages(filePath: string): GalleryImage[] {
 }
 
 /**
- * Check if a post has a gallery — use for conditional rendering decisions
- *
- * @param filePath - entry.filePath from Astro content collection entry
+ * Check if a post has a gallery — use for conditional rendering decisions.
  */
 export function hasGallery(filePath: string): boolean {
   return getGalleryImages(filePath).length > 0;

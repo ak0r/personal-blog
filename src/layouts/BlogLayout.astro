@@ -1,19 +1,23 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import { Picture } from 'astro:assets';
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import SEO from "@/components/SEO.astro";
 import SchemaOrg from "@/components/SchemaOrg.astro";
 import ContentHeader from "@/components/ContentHeader.astro";
 import PostMeta from "@/components/PostMeta.astro";
+import PostNav from "@/components/PostNav.astro";
 import PostItem from "@/components/PostItem.astro";
 import SeriesNav from "@/components/SeriesNav.astro";
+import CopyMarkdown from "@/components/CopyMarkdown.astro";
+import Icon from "@/components/Icon.astro";
 import {
   getPublishedPosts,
   getSeriesPosts,
   getRelatedPosts,
   calculateReadingTime,
 } from "@/utils/content.utils";
-import { getGalleryImages } from '@/utils/image.utils';
+import { getGalleryImages, getCoverImage } from '@/utils/image.utils';
 import PostGallery from '@/components/PostGallery.astro';
 import PostCategory from '@/components/PostCategory.astro';
 import { siteConfig } from "@/site.config";
@@ -25,16 +29,20 @@ interface Props {
 }
 
 const { entry } = Astro.props;
-const { title, description, published, tags, cover, series, category, location } = entry.data;
+const { title, description, published, updated, tags, cover, series, category, location } = entry.data;
 
-const allPosts = await getPublishedPosts();
-const related = getRelatedPosts(entry, allPosts, siteConfig.relatedPosts);
+const allPosts    = await getPublishedPosts();
+const related     = getRelatedPosts(entry, allPosts, siteConfig.relatedPosts);
 const seriesPosts = series ? await getSeriesPosts(series) : [];
-const readTime = calculateReadingTime(entry.body ?? "").text;
+const readTime    = calculateReadingTime(entry.body ?? "").text;
 const galleryImages = getGalleryImages(entry.filePath);
+const coverImage  = getCoverImage(cover);
+const ogImage     = `/og/posts/${entry.id}.png`;
 
-// Generated OG image — cover stays as display image only
-const ogImage = `/og/posts/${entry.id}.png`;
+// Prev / next for post navigation
+const currentIndex = allPosts.findIndex((p) => p.id === entry.id);
+const prev = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
+const next = currentIndex > 0                   ? allPosts[currentIndex - 1] : null;
 ---
 
 <BaseLayout>
@@ -45,30 +53,28 @@ const ogImage = `/og/posts/${entry.id}.png`;
     type="article"
     publishedTime={published}
     {tags}
-    image={cover}
     {ogImage}
   />
   <SchemaOrg slot="seo" type="article" {entry} />
 
   <Fragment slot="header">
     <Breadcrumb label={title} />
+
+    {(category || location) && (
+      <div class="post-eyebrow">
+        {category && <PostCategory {category} />}
+        {location && (
+          <span class="post-eyebrow__location">
+            <Icon name="map-pin" size={13} />
+            {location}
+          </span>
+        )}
+      </div>
+    )}
+
     <ContentHeader {title} pagefind>
       <Fragment slot="meta">
-        <PostMeta {published} {readTime} {tags} />
-        {(location || category) && (
-          <div class="post-context">
-            {location && (
-              <span class="post-location">
-                <span aria-hidden="true">📍</span>
-                {location}
-              </span>
-            )}
-            {location && category && (
-              <span class="post-meta-sep" aria-hidden="true">·</span>
-            )}
-            {category && <PostCategory category={category} />}
-          </div>
-        )}
+        <PostMeta {published} {updated} {readTime} {tags} />
       </Fragment>
     </ContentHeader>
   </Fragment>
@@ -82,9 +88,16 @@ const ogImage = `/og/posts/${entry.id}.png`;
         <meta data-pagefind-filter="tag[content]" content={tag} />
       ))}
 
-      {cover && (
+      {coverImage && (
         <figure class="post-cover">
-          <img src={cover} alt={title} />
+          <Picture
+            src={coverImage}
+            alt={title}
+            width={900}
+            formats={['avif', 'webp']}
+            loading="eager"
+            decoding="async"
+          />
         </figure>
       )}
 
@@ -96,12 +109,15 @@ const ogImage = `/og/posts/${entry.id}.png`;
         <PostGallery images={galleryImages} galleryId={entry.id} />
       )}
     </aside>
+
+    <CopyMarkdown />
   </Fragment>
 
   <Fragment slot="navigation">
     {seriesPosts.length > 1 && (
       <SeriesNav current={entry} posts={seriesPosts} />
     )}
+    <PostNav {prev} {next} />
   </Fragment>
 
   <Fragment slot="after">

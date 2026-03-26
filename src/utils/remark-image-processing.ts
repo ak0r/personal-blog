@@ -9,7 +9,7 @@ import type { Root, Image, Paragraph } from 'mdast';
  * - Image path resolution for posts/ and pages/ collections
  * - Image captions from title attribute
  * - Image grid class assignment for consecutive images
- * - loading="eager" and decoding="async" on all images
+ * - loading="lazy" and decoding="async" on all images
  */
 
 // ── Path Resolution ──────────────────────────────────────────────────────────
@@ -42,6 +42,7 @@ function resolveImagePaths(tree: Root, file: any) {
     }
 
     // Obsidian absolute vault path e.g. posts/forts-of-sahyadri/rajgad/attachments/image.jpg
+    // or pages/attachments/me-wide.jpg
     // Derive content root from file path and strip it
     if (file?.path) {
       const normalizedPath = file.path.replace(/\\/g, '/');
@@ -53,9 +54,23 @@ function resolveImagePaths(tree: Root, file: any) {
           .replace(/\/index\.md$/, '')
           .replace(/\.md$/, '');
 
-        // contentRoot = posts/forts-of-sahyadri/rajgad
+        // contentRoot = posts/forts-of-sahyadri/rajgad  or  pages/about
+
+        // Case 1: url is under this specific content entry's path
+        // posts/my-post/attachments/image.jpg from posts/my-post/index.md
         if (url.startsWith(`${contentRoot}/`)) {
           node.url = `./${url.slice(contentRoot.length + 1)}`;
+          return;
+        }
+
+        // Case 2: vault-absolute path within the same collection
+        // pages/attachments/me-wide.jpg from pages/about.md
+        // Strip the collection name prefix — file is already inside that collection dir
+        const collectionName = contentRoot.split('/')[0]; // 'pages' or 'posts'
+        if (url.startsWith(`${collectionName}/`)) {
+          // pages/attachments/me-wide.jpg → attachments/me-wide.jpg → ./attachments/me-wide.jpg
+          const pathWithinCollection = url.slice(collectionName.length + 1);
+          node.url = `./${pathWithinCollection}`;
           return;
         }
       }
@@ -74,7 +89,9 @@ function addImageAttributes(tree: Root) {
     if (!node.data.hProperties) node.data.hProperties = {};
 
     const props = node.data.hProperties as Record<string, any>;
-    props.loading = props.loading || 'eager';
+    // lazy for all images — browser handles priority naturally;
+    // avoids forcing high-res decode on images that may be off-screen
+    props.loading = props.loading || 'lazy';
     props.decoding = props.decoding || 'async';
   });
 }
@@ -184,7 +201,7 @@ function processImageGrids(tree: Root) {
       return {
         type: 'div',
         data: {
-          hName: 'div',
+          hName:       'div',
           hProperties: { class: 'gallery-item' },
         },
         children: [img],

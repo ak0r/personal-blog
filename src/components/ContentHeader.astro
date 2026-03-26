@@ -1,14 +1,18 @@
 ---
 interface Props {
   title: string;
+  subheading?: string;
   pagefind?: boolean;
 }
 
-const { title, pagefind = false } = Astro.props;
+const { title, subheading } = Astro.props;
 ---
 
 <header class="content-header">
   <h1 class="content-header__title">{title}</h1>
+  {subheading && (
+    <p class="content-header__subheading">{subheading}</p>
+  )}
   {Astro.slots.has('meta') && (
     <div class="content-header__meta">
       <slot name="meta" />

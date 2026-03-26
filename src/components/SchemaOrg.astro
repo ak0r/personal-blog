@@ -45,11 +45,11 @@ const person = {
 // ── Schema builders ──────────────────────────────────────────────────────────
 
 function buildArticle(entry: CollectionEntry<'posts'>) {
-  const { title, description, published, cover, tags, lang } = entry.data;
+  const { title, description, published, updated, cover, tags, lang } = entry.data;
   const canonicalUrl = new URL(`/posts/${entry.id}`, siteUrl).href;
   const imageUrl = cover
     ? new URL(cover, siteUrl).href
-    : new URL('/og-default.png', siteUrl).href;
+    : new URL('/og/default.png', siteUrl).href;
 
   return {
     '@context': 'https://schema.org',
@@ -57,7 +57,7 @@ function buildArticle(entry: CollectionEntry<'posts'>) {
     headline: title,
     ...(description && { description }),
     datePublished: published.toISOString(),
-    dateModified: published.toISOString(),
+    dateModified:  (updated ?? published).toISOString(),
     url: canonicalUrl,
     image: imageUrl,
     inLanguage: lang ?? 'en',

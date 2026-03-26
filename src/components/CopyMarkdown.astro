@@ -1,0 +1,100 @@
+---
+/**
+ * CopyMarkdown.astro
+ *
+ * Fetches the current page through defuddle.md to get clean markdown,
+ * writes it to clipboard. Falls back to opening defuddle in a new tab
+ * if clipboard write is denied.
+ *
+ * Feedback states:
+ *   success → checkmark icon + "Copied!" for 2s
+ *   failed  → x icon + "Failed" for 2s, then opens defuddle in new tab
+ */
+import Icon from '@/components/Icon.astro';
+---
+
+<div class="copy-markdown">
+  <button
+    id="copy-markdown-btn"
+    class="btn btn--ghost btn--sm copy-markdown__btn"
+    aria-label="Copy post as Markdown"
+    title="Copy as Markdown"
+  >
+    <span class="copy-markdown__icon copy-markdown__icon--copy">
+      <Icon name="copy" size={14} />
+    </span>
+    <span class="copy-markdown__icon copy-markdown__icon--check" hidden>
+      <Icon name="check" size={14} />
+    </span>
+    <span class="copy-markdown__icon copy-markdown__icon--x" hidden>
+      <Icon name="x" size={14} />
+    </span>
+    <span class="copy-markdown__label">Copy as Markdown</span>
+  </button>
+</div>
+
+<script>
+  function initCopyMarkdown() {
+    const btn = document.getElementById('copy-markdown-btn');
+    if (!btn) return;
+
+    btn.addEventListener('click', async () => {
+      const url = location.href.replace(/^https?:\/\//, '');
+      const defuddleUrl = `https://defuddle.md/${url}`;
+
+      const iconCopy  = btn.querySelector('.copy-markdown__icon--copy');
+      const iconCheck = btn.querySelector('.copy-markdown__icon--check');
+      const iconX     = btn.querySelector('.copy-markdown__icon--x');
+      const label     = btn.querySelector('.copy-markdown__label');
+
+      function reset() {
+        iconCopy?.removeAttribute('hidden');
+        iconCheck?.setAttribute('hidden', '');
+        iconX?.setAttribute('hidden', '');
+        btn.classList.remove('copy-markdown__btn--failed');
+        if (label) label.textContent = 'Copy as Markdown';
+      }
+
+      function showSuccess() {
+        iconCopy?.setAttribute('hidden', '');
+        iconCheck?.removeAttribute('hidden');
+        if (label) label.textContent = 'Copied!';
+
+        const prevTitle = document.title;
+        document.title = '✅ ' + document.title;
+
+        setTimeout(() => {
+          reset();
+          document.title = prevTitle;
+        }, 2000);
+      }
+
+      function showFailed() {
+        iconCopy?.setAttribute('hidden', '');
+        iconX?.removeAttribute('hidden');
+        btn.classList.add('copy-markdown__btn--failed');
+        if (label) label.textContent = 'Failed';
+
+        setTimeout(() => {
+          reset();
+          window.open(defuddleUrl, '_blank', 'noopener');
+        }, 2000);
+      }
+
+      try {
+        const res = await fetch(defuddleUrl);
+        if (!res.ok) { showFailed(); return; }
+
+        const text = await res.text();
+        await navigator.clipboard.writeText(text);
+        showSuccess();
+
+      } catch {
+        showFailed();
+      }
+    });
+  }
+
+  initCopyMarkdown();
+  document.addEventListener('astro:after-swap', initCopyMarkdown);
+</script>

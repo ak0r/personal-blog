@@ -96,40 +96,60 @@ export async function getSeriesPosts(
 }
 
 /**
- * Related posts for a given post — matched by tags, sorted by date descending.
- * Falls back to recent posts if no tag matches found.
+ * Related posts for a given post — scored by category + tag overlap.
+ * Falls back to recent posts if not enough matches found.
+ *
+ * Scoring:
+ *   same category + shared tag → 3
+ *   same category only         → 2
+ *   shared tag only            → 1
+ *
+ * Posts sorted by score desc, then date desc within each score tier.
  */
 export function getRelatedPosts(
   current: CollectionEntry<"posts">,
   allPosts: CollectionEntry<"posts">[],
   count: number
 ): CollectionEntry<"posts">[] {
-  const currentTags = current.data.tags ?? [];
-
-  const related = allPosts
-    .filter(
-      (post) =>
-        post.id !== current.id &&
-        (post.data.tags ?? []).some((tag) => currentTags.includes(tag))
+  const currentTags     = current.data.tags     ?? [];
+  const currentCategory = current.data.category;
+ 
+  const scored = allPosts
+    .filter((post) => post.id !== current.id)
+    .map((post) => {
+      const sameCategory = currentCategory && post.data.category === currentCategory;
+      const sharedTag    = (post.data.tags ?? []).some((tag) => currentTags.includes(tag));
+ 
+      let score = 0;
+      if (sameCategory && sharedTag) score = 3;
+      else if (sameCategory)         score = 2;
+      else if (sharedTag)            score = 1;
+ 
+      return { post, score };
+    })
+    .filter(({ score }) => score > 0)
+    .sort((a, b) =>
+      b.score - a.score ||
+      b.post.data.published.valueOf() - a.post.data.published.valueOf()
     )
-    .sort((a, b) => b.data.published.valueOf() - a.data.published.valueOf())
-    .slice(0, count);
-
-  // Fallback to recent posts if no tag matches
-  if (related.length < count) {
+    .slice(0, count)
+    .map(({ post }) => post);
+ 
+  // Fallback to recent posts if not enough scored matches
+  if (scored.length < count) {
     const recent = allPosts
       .filter(
         (post) =>
           post.id !== current.id &&
-          !related.find((r) => r.id === post.id)
+          !scored.find((r) => r.id === post.id)
       )
       .sort((a, b) => b.data.published.valueOf() - a.data.published.valueOf())
-      .slice(0, count - related.length);
-
-    return [...related, ...recent];
+      .slice(0, count - scored.length);
+ 
+    return [...scored, ...recent];
   }
-
-  return related;
+ 
+  return scored;
 }
 
 // ── Pure utilities ─────────────────────────────────────────────────────────────

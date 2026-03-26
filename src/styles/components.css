@@ -23,16 +23,16 @@
 
   /* ── PostItem ───────────────────────────────────── */
   .post-item {
-    @apply flex flex-row items-baseline gap-2 justify-between;
+    @apply flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-2 sm:justify-between;
   }
 
   .post-item__link {
-    @apply no-underline text-foreground justify-start text-base md:text-lg;
+    @apply no-underline text-foreground text-base md:text-lg;
     &:hover { @apply opacity-70; }
   }
 
   .post-item__meta {
-    @apply flex flex-row gap-2 md:gap-4 justify-end items-center shrink-0;
+    @apply flex flex-row gap-2 items-center shrink-0;
   }
 
   /* ── PostMeta ───────────────────────────────────── */
@@ -52,14 +52,27 @@
     @apply flex flex-wrap gap-2;
   }
 
+  .post-meta__item {
+    @apply inline-flex items-center gap-1.5;
+  }
+
+  .post-meta__updated-label {
+    @apply text-foreground-minimal text-xs font-medium uppercase tracking-wide;
+  }
+
   .post-tag {
-    @apply no-underline text-foreground-subtle;
+    @apply no-underline text-foreground-subtle inline-flex items-center gap-1;
     &:hover { @apply text-foreground; }
   }
 
   /* ── ContentHeader ───────────────────────────────── */
   .content-header {
     @apply mb-10;
+  }
+
+  .content-header__subheading {
+    font-family: var(--font-secondary);
+    @apply mt-3 mb-0 text-lg text-foreground-subtle leading-relaxed max-w-prose;
   }
 
   .content-header__meta {
@@ -79,12 +92,18 @@
     @apply mb-10;
   }
 
-  .post-context {
-    @apply flex items-center flex-wrap gap-2 text-sm text-foreground-subtle mt-1;
+  /* ── Post eyebrow — category + location above title ─ */
+  .post-eyebrow {
+    @apply flex items-center gap-3 mb-3;
   }
 
-  .post-location {
-    @apply flex items-center gap-1;
+  .post-eyebrow__location {
+    @apply flex items-center gap-1.5 text-sm text-foreground-subtle;
+  }
+
+  /* Category badge in eyebrow — larger than list badge */
+  .badge--category {
+    @apply text-xs md:text-sm px-1.5 md:px-2.5 py-1 md:font-medium;
   }
 
   .related-posts {
@@ -139,7 +158,8 @@
 
   .series-nav__list {
     /* card--flat treatment: subtle bg, rounded, no border */
-    @apply list-none mx-4 mb-4 p-4 flex flex-col gap-1 rounded-lg;
+    @apply list-none mx-4 mb-4 p-4 flex flex-col gap-1
+           bg-background-subtle rounded-lg;
     counter-reset: series-counter;
   }
 
@@ -218,7 +238,7 @@
   /* ── Gallery ─────────────────────────────────────── */
   .gallery-grid {
     @apply grid gap-2 my-6;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
   }
 
   .gallery-single {
@@ -227,16 +247,31 @@
 
   .gallery-item {
     @apply block overflow-hidden
-           bg-background-subtle cursor-zoom-in rounded-lg shadow-sm;
+           bg-background-subtle cursor-zoom-in rounded-lg shadow-sm ring ring-border;
+    transition: box-shadow 0.2s ease;
+    &:hover { @apply shadow-md; }
   }
 
   .gallery-item__image {
-    @apply w-full h-full object-cover block aspect-3/2 rounded-lg;
-    transition: transform 0.2s ease;
+    @apply w-full h-full object-cover block aspect-3/2 rounded-lg border border-border;
+    transition: opacity 0.2s ease, filter 0.2s ease;
+  }
+
+  /* Inline gallery images (remark-generated) rendered at full source
+     resolution — subtle blur takes the clinical edge off thumbnails
+     without affecting the lightbox full-size view */
+  .post-content .gallery-item__image {
+    filter: blur(0.4px);
   }
 
   .gallery-item:hover .gallery-item__image {
-    transform: scale(1.03);
+    opacity: 0.88;
+    filter: brightness(0.96);
+  }
+
+  /* Ensure hover overrides the resting blur on inline images */
+  .post-content .gallery-item:hover .gallery-item__image {
+    filter: brightness(0.96);
   }
 
   .gallery-item:focus-visible {
@@ -384,6 +419,70 @@
     @apply text-foreground-subtle text-sm;
     &:hover { @apply text-foreground; }
     &::after { content: none !important; }
+  }
+
+  /* ── PostNav ─────────────────────────────────────── */
+  .post-nav {
+    @apply flex gap-4 border-t border-border pt-8 mt-8;
+  }
+
+  @media (max-width: 640px) {
+    .post-nav {
+      @apply flex-col;
+    }
+
+    .post-nav__link--next {
+      @apply text-left;
+    }
+
+    .post-nav__link--next .post-nav__label {
+      @apply justify-start;
+    }
+  }
+
+  .post-nav__link {
+    @apply flex flex-col gap-3 flex-1 no-underline p-3 rounded-lg leading-10
+           bg-background-subtle transition-all duration-200;
+    &:hover { @apply bg-background-minimal shadow-sm; }
+    &::after { content: none !important; }
+  }
+
+  .post-nav__link--next {
+    @apply text-right;
+  }
+
+  .post-nav__label {
+    @apply flex items-center gap-1 text-xs text-foreground-subtle font-medium uppercase tracking-wide;
+  }
+
+  .post-nav__link--next .post-nav__label {
+    @apply justify-end;
+  }
+
+  .post-nav__title {
+    @apply text-sm text-foreground leading-snug;
+  }
+
+  .post-nav__spacer {
+    @apply flex-1;
+  }
+
+  /* ── CopyMarkdown ────────────────────────────────── */
+  .copy-markdown {
+    @apply flex justify-end mt-6 pt-6 border-t border-border;
+  }
+
+  .copy-markdown__btn {
+    @apply gap-1.5 text-foreground-subtle;
+    &:hover { @apply text-foreground; }
+  }
+
+  .copy-markdown__label {
+    @apply text-xs;
+  }
+  
+  .copy-markdown__btn--failed {
+    color: var(--color-clay);
   }
 
   /* ── Custom BG utilities ─────────────────────────── */

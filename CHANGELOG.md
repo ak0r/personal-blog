@@ -4,6 +4,53 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## 0.6.0 - 2026-03-26
+
+### Added
+
+- **`Logo.astro`** — inline SVG component for site logo; renders paths directly with `fill="currentColor"` so the logo inherits theme color and switches with light/dark mode; replaces `<img>` approach which isolated the SVG from CSS
+- **`PostNav.astro`** — prev/next post navigation component; card-style links with direction labels; sorted by date; mobile: flex-col stacked layout; `min-height: 5rem` on links for balanced sizing when titles differ in length
+- **`CopyMarkdown.astro`** — copy-as-markdown button using defuddle.md API; three feedback states: default (copy icon), success (check icon + "Copied!" + `✅` title prefix for 2s), failed (x icon + "Failed" for 2s then opens defuddle in new tab as fallback); distinguishes HTTP errors from network/clipboard errors via `res.ok` check
+- **`ContentHeader.astro`** — `subheading?: string` prop; renders in Newsreader font at `text-lg text-foreground-subtle` below the main title
+- **`Icon.astro`** — added icons: `calendar`, `clock`, `hash`, `map-pin`, `compass`, `cpu`, `tag`, `arrow-left`, `arrow-right`, `copy`, `check`, `x`
+- **`PostMeta.astro`** — `updated?: Date` prop; shows "Updated" label + updated date when present and `showFull` is true; icons (calendar, clock, hash) visible in full post context only
+- **`PostCategory.astro`** — category icon (`compass` for travel, `cpu` for tech) rendered via `Icon.astro` alongside badge
+- **`SchemaOrg.astro`** — `dateModified` uses `updated ?? published`
+- **`breadcrumb.utils.ts`** — `CATEGORIES` array for generalised category detection; handles `/posts/travel` and `/posts/tech` category pages; strips pagination path segments
+- **`image.utils.ts`** — `allAttachmentImages` glob for `src/content/posts/**/attachments/`; `getCoverImage()` strips Obsidian `[[]]` wikilink syntax and resolves vault paths to glob keys
+- **`content.utils.ts`** — `getRelatedPosts()` scoring system: same category + shared tag = 3, same category = 2, shared tag = 1; sorted by score desc then date desc; fallback to recent posts
+- **`remark-image-processing.ts`** — Case 2 added for collection-root paths (e.g. `pages/attachments/me-wide.jpg`); `loading: 'lazy'` applied to all processed images
+- **`post.schema.ts`** — `updated: z.coerce.date().optional()` and `lang: z.string().optional()` fields
+- **`page.schema.ts`** — `lang: z.string().optional()` field
+- **Dynamic category pages** — `src/pages/posts/[category]/[...page].astro`; `CATEGORY_META` defined inside `getStaticPaths` for Astro module scope compatibility; travel + tech routes with category-aware breadcrumbs and OG images
+- **OG image system rewritten** — both endpoints now use `@vercel/og` (`ImageResponse`) for consistency and Astro 6 build compatibility; `astro-og-canvas` removed
+  - `src/pages/og/posts/[...slug].png.ts` — per-post images with Rubik font via Fontsource API; category badge, left colour border, author avatar, date
+  - `src/pages/og/[page].png.ts` — static page images (default, posts, posts-travel, posts-tech, tags, about, search); plain `getStaticPaths` function, no `await OGImageRoute`
+- **Sitemap priority tiers** — `astro.config.mjs` `serialize` callback: homepage 1.0, category pages 0.8, posts 0.7, static pages 0.6, tags 0.5, search/404 0.3
+- **Theme color meta** — `Head.astro`: `#faf9f5` light, `#141413` dark
+- **`robots.txt`** — `public/robots.txt` with `Allow: /` and sitemap reference
+- **Reading progress bar** — `site-header::after` pseudo-element; `animation-timeline: scroll()`; `bottom: -2px` to clear `border-b`; `@keyframes reading-progress` (scaleX 0→1); accent color
+- **Header scroll shadow** — corrected `animation-range: 0px 1px` so shadow appears on first pixel of scroll
+- **Mobile menu Escape key** — `keydown` listener closes nav when `Escape` pressed and menu is open
+- **ScrollToTop fade** — CSS `animation-timeline: scroll()` with `animation-range: 0px 300px` fades button in after 300px scroll; replaces JS-based `hidden` attribute toggle
+- **`siteConfig.logo`** — optional `logo?: string` field added to `SiteConfig` interface; `Header.astro` renders `<Logo />` component when set, site title text as fallback
+
+### Changed
+
+- `Header.astro` — brand renders `<Logo />` inline (not `<img>`); single `<a>` wrapper replacing previously nested anchors; Escape key closes mobile menu
+- `BlogLayout.astro` — cover image resolved via `getCoverImage()` returning `ImageMetadata`; rendered with `<Picture>` (loading eager, formats avif/webp, width 900); `ogImage` passed as `/og/posts/${entry.id}.png`
+- `GalleryImage.astro` — width 360, height 240, quality 78
+- `ImageWrapper.astro` — `quality` prop added (default 80)
+- `SEO.astro` — `ogImage` prop takes priority over `image`; fallback to `/og/default.png`
+- `[page].png.ts` — migrated from `astro-og-canvas` `OGImageRoute` to `@vercel/og` `ImageResponse`; matches design and code patterns of `[...slug].png.ts`
+- `layout.css` — reading progress `@keyframes` renamed from `progress-grow` to `reading-progress` (was mismatched); `bottom: -2px` on `::after`; `PostNav` `.post-nav__link` gets `min-height: 5rem`; `.scroll-to-top` uses scroll-driven opacity animation
+- `astro.config.mjs` — sitemap `serialize` callback added; CSP extended for Cloudflare Analytics
+
+### Removed
+
+- `astro-og-canvas` dependency — replaced by `@vercel/og` for both OG image endpoints
+- `CopyMarkdown` silent catch fallback — now shows explicit failed state before opening fallback tab
+
 ## 0.5.0 - 2026-03-25
 
 ### Added

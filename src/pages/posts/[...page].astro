@@ -25,7 +25,7 @@ const isFirst = page.currentPage === 1;
     description={isFirst ? "All posts" : `Page ${page.currentPage} of ${page.lastPage}`}
   />
   <Breadcrumb />
-  <ContentHeader title="Articles">
+  <ContentHeader title="Articles" subheading="This is my personal space where I share my thoughts, ideas and other interesting things I come across.">
     {page.lastPage > 1 && (
       <span slot="meta">Page {page.currentPage} of {page.lastPage}</span>
     )}

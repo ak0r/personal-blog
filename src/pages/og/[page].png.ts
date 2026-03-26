@@ -1,48 +1,74 @@
 /**
  * src/pages/og/[page].png.ts
  *
- * Static OG images for non-post pages.
- * Output: /og/default.png, /og/posts.png, /og/tags.png, /og/about.png, /og/search.png
+ * Static OG images for non-post pages using @vercel/og — same approach as
+ * posts/[...slug].png.ts for consistency and Astro 6 compatibility.
  *
- * Simpler layout than post images — centered title + description,
- * left accent border, site name bottom-right.
+ * Output: /og/default.png, /og/posts.png, /og/tags.png, /og/about.png,
+ *         /og/search.png, /og/posts-travel.png, /og/posts-tech.png
  */
 
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { ImageResponse } from '@vercel/og';
 import { siteConfig } from '@/site.config';
 
+// ── Palette (matches [...slug].png.ts) ────────────────────────────────────────
+
 const C = {
   bg:      '#faf9f5',
+  bgAlt:   '#f5f4ed',
   title:   '#141413',
   body:    '#5e5d59',
   subtle:  '#87867f',
   divider: '#d1cfc5',
-  accent:  '#788c5d',
+  accent:  '#3AA99F',
+  clay:    '#d97757',
+  sky:     '#6a9bcc',
 } as const;
 
-const PAGE_DATA: Record<string, { title: string; description: string }> = {
-  default: {
+// ── Page definitions ──────────────────────────────────────────────────────────
+
+const PAGES = {
+  'default': {
     title:       siteConfig.title,
     description: siteConfig.description,
+    border:      C.accent,
   },
-  posts: {
+  'posts': {
     title:       'Articles',
     description: 'Travel stories and tech writing',
+    border:      C.accent,
   },
-  tags: {
+  'posts-travel': {
+    title:       'Travel',
+    description: 'Forts, temples, and roads less taken — travel writing from the Sahyadris, across India, and beyond.',
+    border:      C.clay,
+  },
+  'posts-tech': {
+    title:       'Tech',
+    description: 'Notes on building things — self-hosted infrastructure, developer tooling, and systems that stay out of the way.',
+    border:      C.sky,
+  },
+  'tags': {
     title:       'Tags',
     description: 'Browse posts by topic',
+    border:      C.accent,
   },
-  about: {
+  'about': {
     title:       'About',
     description: `${siteConfig.author} — ${siteConfig.description}`,
+    border:      C.accent,
   },
-  search: {
+  'search': {
     title:       'Search',
-    description: `Search all posts on ${siteConfig.title}`,
+    description: `Search across all posts on ${siteConfig.title}`,
+    border:      C.accent,
   },
-};
+} as const;
+
+type PageKey = keyof typeof PAGES;
+
+// ── Font loader ───────────────────────────────────────────────────────────────
 
 async function loadFont(url: string): Promise<ArrayBuffer> {
   const res = await fetch(url);
@@ -50,19 +76,32 @@ async function loadFont(url: string): Promise<ArrayBuffer> {
   return res.arrayBuffer();
 }
 
-export const getStaticPaths: GetStaticPaths = async () =>
-  Object.keys(PAGE_DATA).map((page) => ({
+// ── Static paths ──────────────────────────────────────────────────────────────
+
+export const getStaticPaths: GetStaticPaths = () => {
+  return (Object.keys(PAGES) as PageKey[]).map((page) => ({
     params: { page },
-    props:  PAGE_DATA[page],
+    props:  PAGES[page],
   }));
+};
+
+// ── GET ───────────────────────────────────────────────────────────────────────
 
 export const GET: APIRoute = async ({ props }) => {
-  const { title, description } = props as { title: string; description: string };
+  const { title, description, border } = props as {
+    title:       string;
+    description: string;
+    border:      string;
+  };
 
   const [fontRegular, fontSemiBold] = await Promise.all([
     loadFont('https://api.fontsource.org/v1/fonts/rubik/latin-400-normal.ttf'),
     loadFont('https://api.fontsource.org/v1/fonts/rubik/latin-600-normal.ttf'),
   ]);
+
+  const truncatedDesc = description.length > 130
+    ? description.slice(0, 130) + '…'
+    : description;
 
   const html = {
     type: 'div',
@@ -77,20 +116,20 @@ export const GET: APIRoute = async ({ props }) => {
       },
       children: [
 
-        // Left accent border
+        // Left colour border
         {
           type: 'div',
           props: {
             style: {
               width:      '12px',
               height:     '100%',
-              background: C.accent,
+              background: border,
               flexShrink: 0,
             },
           },
         },
 
-        // Content
+        // Main content
         {
           type: 'div',
           props: {
@@ -103,39 +142,39 @@ export const GET: APIRoute = async ({ props }) => {
             },
             children: [
 
-              // Title + description
+              // Top — title + description
               {
                 type: 'div',
                 props: {
-                  style: { display: 'flex', flexDirection: 'column', gap: '0px' },
+                  style: { display: 'flex', flexDirection: 'column' },
                   children: [
                     {
                       type: 'div',
                       props: {
                         style: {
-                          fontSize:   '80px',
+                          fontSize:   title.length > 20 ? '72px' : '88px',
                           fontWeight: 600,
                           color:      C.title,
-                          lineHeight: 1.1,
+                          lineHeight: 1.15,
                           display:    'flex',
                         },
                         children: title,
                       },
                     },
-                    {
+                    ...(truncatedDesc ? [{
                       type: 'div',
                       props: {
                         style: {
-                          fontSize:   '30px',
+                          fontSize:   '28px',
                           fontWeight: 400,
                           color:      C.body,
                           lineHeight: 1.5,
-                          marginTop:  '20px',
+                          marginTop:  '24px',
                           display:    'flex',
                         },
-                        children: description,
+                        children: truncatedDesc,
                       },
-                    },
+                    }] : []),
                   ],
                 },
               },
@@ -157,71 +196,35 @@ export const GET: APIRoute = async ({ props }) => {
                         },
                       },
                     },
-                    // Author + site name row
                     {
                       type: 'div',
                       props: {
                         style: {
                           display:        'flex',
+                          flexDirection:  'row',
                           justifyContent: 'space-between',
                           alignItems:     'center',
                         },
                         children: [
-                          // Author + date
                           {
                             type: 'div',
                             props: {
                               style: {
-                                display:       'flex',
-                                flexDirection: 'row',
-                                alignItems:    'center',
-                                gap:           '12px',
+                                fontSize:   '22px',
+                                fontWeight: 400,
+                                color:      C.subtle,
+                                display:    'flex',
                               },
-                              children: [
-                                // Avatar circle
-                                {
-                                  type: 'div',
-                                  props: {
-                                    style: {
-                                      width:           '44px',
-                                      height:          '44px',
-                                      borderRadius:    '50%',
-                                      background:      C.accent,
-                                      display:         'flex',
-                                      alignItems:      'center',
-                                      justifyContent:  'center',
-                                      color:           '#ffffff',
-                                      fontSize:        '20px',
-                                      fontWeight:      600,
-                                      flexShrink:      0,
-                                    },
-                                    children: siteConfig.author.charAt(0).toUpperCase(),
-                                  },
-                                },
-                                // Author name + date
-                                {
-                                  type: 'div',
-                                  props: {
-                                    style: {
-                                      fontSize:   '20px',
-                                      fontWeight: 600,
-                                      color:      C.title,
-                                      display:    'flex',
-                                    },
-                                    children: siteConfig.author,
-                                  },
-                                },
-                              ],
+                              children: siteConfig.author,
                             },
                           },
-                          // Site name
                           {
                             type: 'div',
                             props: {
                               style: {
                                 fontSize:   '22px',
                                 fontWeight: 600,
-                                color:      C.accent,
+                                color:      border,
                                 display:    'flex',
                               },
                               children: siteConfig.title,

@@ -1,0 +1,47 @@
+---
+/**
+ * PostNav.astro
+ *
+ * Previous / next post navigation rendered below post content.
+ * Global ordering by date — not series-aware (SeriesNav handles that).
+ * Only renders when at least one neighbour exists.
+ *
+ * Used in BlogLayout via the `navigation` slot.
+ */
+
+import type { CollectionEntry } from 'astro:content';
+import Icon from '@/components/Icon.astro';
+
+interface Props {
+  prev: CollectionEntry<'posts'> | null;
+  next: CollectionEntry<'posts'> | null;
+}
+
+const { prev, next } = Astro.props;
+
+if (!prev && !next) return;
+---
+
+<nav class="post-nav" aria-label="Post navigation">
+  {prev && (
+    <a href={`/posts/${prev.id}`} class="post-nav__link post-nav__link--prev">
+      <span class="post-nav__label">
+        <Icon name="arrow-left" size={13} />
+        Previous
+      </span>
+      <span class="post-nav__title">{prev.data.title}</span>
+    </a>
+  )}
+
+  {!prev && <span class="post-nav__spacer" aria-hidden="true" />}
+
+  {next && (
+    <a href={`/posts/${next.id}`} class="post-nav__link post-nav__link--next">
+      <span class="post-nav__label">
+        Next
+        <Icon name="arrow-right" size={13} />
+      </span>
+      <span class="post-nav__title">{next.data.title}</span>
+    </a>
+  )}
+</nav>

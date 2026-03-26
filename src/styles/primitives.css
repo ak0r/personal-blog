@@ -7,12 +7,12 @@
        .badge.badge--outline.badge--sky
   ──────────────────────────────────────────────────── */
   .badge {
-    @apply inline-flex items-center gap-1 rounded-full text-xs font-medium;
+    @apply inline-flex items-center gap-1 rounded-full text-xs md:font-medium;
   }
 
   /* Variants */
   .badge--subtle {
-    @apply px-2 py-0.5;
+    @apply px-1 md:px-2 py-0.5;
   }
 
   .badge--outline {

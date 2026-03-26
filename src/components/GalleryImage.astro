@@ -28,8 +28,9 @@ const { image, galleryId } = Astro.props;
   <ImageWrapper
     src={image.src}
     alt={image.alt}
-    width={480}
-    height={320}
+    width={360}
+    height={240}
+    quality={78}
     class="gallery-item__image"
     loading="lazy"
     bare

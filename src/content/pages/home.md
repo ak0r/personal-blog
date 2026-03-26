@@ -1,9 +1,11 @@
 ---
 title: Home
 description: Home Page
+published: 2026-01-01
 ---
 
-## A place for writing.
+## Hey I am Amit.
 
-Muul (मूळ, Sanskrit: foundation) is a minimal Astro blog template built for writers. No framework dependencies, no utility sprawl — just semantic HTML, a considered type system, and a colour palette you can make yours in one file.
-The template handles the rest: posts by year, tags, dark mode, readable typography. Nothing more.
+I build **systems** during the week and explore **streets** around the world whenever I can. Both worlds make for good **stories**. This blog documents them both — the technical experiments I run in my off-hours and the places I discover when I'm away from the screen. Sometimes I'm debugging code, other times I'm lost in a new city.
+
+That's me in 10 seconds. Want the extended version? Head over to [/about](/about).

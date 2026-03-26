@@ -2,27 +2,29 @@
 /**
  * PostMeta — shared date, read time, and tag meta for posts.
  *
- * In list context (PostItem):  date only — "March 2nd"
- * In post context (BlogLayout): date · read time · #tag #tag
+ * In list context (PostItem):  date only — "March 2nd", no icons
+ * In post context (BlogLayout): date · read time · tags, with icons
  *
- * The default slot allows forks to inject extra meta (e.g. Agrima's type badge).
+ * When `updated` is provided it replaces `published` in the display
+ * with an "Updated" prefix. published is still used for the datetime attribute.
  */
 import { ordinalSuffix } from "@/utils/string.utils";
+import Icon from "@/components/Icon.astro";
 
 interface Props {
   published: Date;
+  updated?:  Date;
   readTime?: string;
   tags?: string[];
 }
 
-const { published, readTime, tags } = Astro.props;
+const { published, updated, readTime, tags } = Astro.props;
 
-const day = published.getDate();
-const month = published.toLocaleDateString("en-US", { month: "long" });
-const year = published.getFullYear();
+const displayDate = updated ?? published;
+const day   = displayDate.getDate();
+const month = displayDate.toLocaleDateString("en-US", { month: "long" });
+const year  = displayDate.getFullYear();
 
-// List context: "March 2nd" — no year, ordinal day
-// Post context: "March 2nd, 2026" — with year
 const dateShort = `${month} ${ordinalSuffix(day)}`;
 const dateFull  = `${dateShort}, ${year}`;
 
@@ -30,14 +32,19 @@ const showFull = !!readTime || (tags && tags.length > 0);
 ---
 
 <div class="post-meta">
-  <time datetime={published.toISOString()}>
+  <time class="post-meta__item" datetime={published.toISOString()}>
+    {showFull && <Icon name="calendar" size={13} />}
+    {updated && showFull && <span class="post-meta__updated-label">Updated</span>}
     {showFull ? dateFull : dateShort}
   </time>
 
   {readTime && (
     <>
       <span class="post-meta-sep" aria-hidden="true">·</span>
-      <span>{readTime}</span>
+      <span class="post-meta__item">
+        <Icon name="clock" size={13} />
+        {readTime}
+      </span>
     </>
   )}
 
@@ -46,12 +53,14 @@ const showFull = !!readTime || (tags && tags.length > 0);
       <span class="post-meta-sep" aria-hidden="true">·</span>
       <span class="post-meta-tags" aria-label="Tags">
         {tags.map((tag) => (
-          <a href={`/tags/${tag}`} class="post-tag">#{tag}</a>
+          <a href={`/tags/${tag}`} class="post-tag badge badge--outline">
+            <Icon name="hash" size={11} />
+            {tag}
+          </a>
         ))}
       </span>
     </>
   )}
 
-  <!-- Fork extension point — e.g. Agrima injects a type badge here -->
   <slot />
 </div>

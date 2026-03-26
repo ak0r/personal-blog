@@ -1,6 +1,7 @@
 ---
 import { siteConfig } from "@/site.config";
 import Container from "./Container.astro";
+import Logo from './Logo.astro';
 
 const currentPath = new URL(Astro.request.url).pathname;
 
@@ -15,7 +16,9 @@ const contentWidth = siteConfig.pageWidth || 'lg';
 <header class="site-header">
   <Container setWidth={contentWidth}>
     <nav class="site-header__nav">
-      <a href="/" aria-label={`${siteConfig.title} home`} class="site-header__brand">{siteConfig.title}</a>
+      <a href="/" aria-label={`${siteConfig.title} home`} class="site-header__brand">
+        {siteConfig.logo ? <Logo /> : siteConfig.title}
+      </a>
 
       <!-- Desktop nav links -->
       <div class="site-header__desktop">
@@ -113,6 +116,12 @@ const contentWidth = siteConfig.pageWidth || 'lg';
       if (e.matches) {
         navMobile.setAttribute('hidden', '');
         navToggle.setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && navToggle.checked) {
+        navToggle.checked = false;
       }
     });
   }

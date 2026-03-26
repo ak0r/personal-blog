@@ -1,0 +1,81 @@
+---
+/**
+ * src/pages/posts/[category]/[...page].astro
+ *
+ * Paginated archive for each post category.
+ * Routes: /posts/travel, /posts/travel/2, /posts/tech, /posts/tech/2, etc.
+ *
+ * Adding a new category only requires:
+ *   1. Adding it to the category enum in post.schema.ts
+ *   2. Adding its entry to CATEGORY_META inside getStaticPaths
+ */
+
+import type { GetStaticPathsOptions } from 'astro';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SEO from '@/components/SEO.astro';
+import ContentHeader from '@/components/ContentHeader.astro';
+import PostList from '@/components/PostList.astro';
+import Pagination from '@/components/Pagination.astro';
+import Breadcrumb from '@/components/Breadcrumb.astro';
+import { getPublishedPosts } from '@/utils/content.utils';
+import { siteConfig } from '@/site.config';
+
+export async function getStaticPaths({ paginate }: GetStaticPathsOptions) {
+  // Defined here so getStaticPaths has direct access —
+  // Astro runs getStaticPaths in a separate module scope from the frontmatter
+  const CATEGORY_META = {
+    travel: {
+      title:       'Travel',
+      subheading:  'Forts, temples, and roads less taken — travel writing from the Sahyadris, across India, and beyond.',
+      description: 'Travel writing from the Sahyadris, across India, and beyond.',
+      ogImage:     '/og/posts-travel.png',
+    },
+    tech: {
+      title:       'Tech',
+      subheading:  'Notes on building things — self-hosted infrastructure, developer tooling, and systems that stay out of the way.',
+      description: 'Notes on self-hosted infrastructure, developer tooling, and systems that stay out of the way.',
+      ogImage:     '/og/posts-tech.png',
+    },
+  } as const;
+
+  const allPosts = await getPublishedPosts();
+
+  return Object.entries(CATEGORY_META).flatMap(([category, meta]) => {
+    const filtered = allPosts.filter((p) => p.data.category === category);
+    return paginate(filtered, {
+      params: { category },
+      props:  { meta },
+      pageSize: siteConfig.postsPerPage ?? 20,
+    });
+  });
+}
+
+const { page, meta } = Astro.props;
+const isFirst = page.currentPage === 1;
+---
+
+<BaseLayout>
+  <SEO
+    slot="seo"
+    title={meta.title}
+    description={isFirst
+      ? meta.description
+      : `${meta.title} — Page ${page.currentPage} of ${page.lastPage}`}
+    ogImage={meta.ogImage}
+  />
+
+  <Breadcrumb />
+  <ContentHeader title={meta.title} subheading={meta.subheading}>
+    {page.lastPage > 1 && (
+      <span slot="meta">Page {page.currentPage} of {page.lastPage}</span>
+    )}
+  </ContentHeader>
+
+  <PostList posts={page.data} />
+
+  <Pagination
+    currentPage={page.currentPage}
+    lastPage={page.lastPage}
+    url={page.url}
+  />
+</BaseLayout>

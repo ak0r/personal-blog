@@ -14,6 +14,7 @@ export interface SiteConfig {
   title: string;
   description: string;
   author: string;
+  logo?: string;       // path to logo image in public/ e.g. '/logo.svg'
   social: SocialItem[];
   navigation: NavItem[];
   recentPosts: number;
@@ -24,10 +25,11 @@ export interface SiteConfig {
 }
 
 export const siteConfig: SiteConfig = {
-  url: "https://base.amitkul.in",
-  title: "Astro Base",
-  description: "A foundational personal blog",
+  url: "https://amitkul.in",
+  title: "Amit K",
+  description: "Building systems by day, exploring streets around the world whenever possible.Sharing tech articles, travel guides, and photo galleries.",
   author: "Amit K",
+  logo: '/logo.svg',  // uncomment and set path when you have a logo
   social: [
     {
       title: "GitHub",

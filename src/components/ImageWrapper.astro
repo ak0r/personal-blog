@@ -11,6 +11,7 @@ interface Props {
   loading?: 'lazy' | 'eager';
   caption?: string;
   bare?: boolean;
+  quality?: number;
 }
 
 const {
@@ -22,6 +23,7 @@ const {
   loading = 'lazy',
   caption,
   bare = false,
+  quality = 80,
 } = Astro.props;
 
 const isAstroImage = (src: unknown): src is ImageMetadata =>
@@ -38,6 +40,7 @@ const isAstroImage = (src: unknown): src is ImageMetadata =>
       loading={loading}
       decoding="async"
       formats={['avif', 'webp']}
+      quality={quality}
       class={className}
     />
   ) : (
@@ -56,6 +59,7 @@ const isAstroImage = (src: unknown): src is ImageMetadata =>
         loading={loading}
         decoding="async"
         formats={['avif', 'webp']}
+        quality={quality}
         class={className}
       />
     ) : (

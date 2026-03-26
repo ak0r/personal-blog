@@ -14,7 +14,7 @@ export default defineConfig({
 
   image: {
     responsiveStyles: true,
-    layout: "constrained"
+    // layout: "constrained"
   },
 
   security: {
@@ -83,7 +83,31 @@ export default defineConfig({
         theme.name === 'everforest-dark' ? '[data-theme="dark"]' : '[data-theme="light"]',
     }),
     mdx(), 
-    sitemap(),
+    sitemap({
+      serialize(item) {
+        // Priority hints — higher for content, lower for utility pages
+        if (item.url === 'https://base.amitkul.in/') {
+          item.priority = 1.0;
+        } else if (
+          item.url.includes('/posts/travel') ||
+          item.url.includes('/posts/tech')
+        ) {
+          item.priority = 0.8;
+        } else if (item.url.includes('/posts/')) {
+          item.priority = 0.7;
+        } else if (item.url.includes('/tags/')) {
+          item.priority = 0.5;
+        } else if (
+          item.url.includes('/search') ||
+          item.url.includes('/404')
+        ) {
+          item.priority = 0.3;
+        } else {
+          item.priority = 0.6;
+        }
+        return item;
+      },
+    }),
   ],
 
   vite: {
