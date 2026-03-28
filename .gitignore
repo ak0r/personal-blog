@@ -26,3 +26,6 @@ pnpm-debug.log*
 
 # Pagfind earch index
 public/pagefind/*
+
+#Claude
+.claude/
