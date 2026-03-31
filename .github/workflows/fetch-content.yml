@@ -19,6 +19,8 @@ jobs:
 
       - name: Update content submodule
         run: |
+          git -C src/content reset --hard
+          git -C src/content clean -fd
           git submodule update --remote src/content
 
       - name: Commit and push if changed
