@@ -14,19 +14,29 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          submodules: true      # checks out vault submodule too
-          fetch-depth: 0        # full history needed for diff
+          submodules: true
+          fetch-depth: 0
 
       - name: Get previous and incoming submodule SHA
         id: shas
         run: |
-          # SHA before submodule update (last synced state)
+          # SHA before update — current submodule pointer
           PREV_SHA=$(git -C src/content rev-parse HEAD)
           echo "prev_sha=$PREV_SHA" >> $GITHUB_OUTPUT
-          echo "Previous submodule SHA: $PREV_SHA"
+          echo "Previous SHA: $PREV_SHA"
 
-          # SHA dispatched from vault (the [sync] commit)
-          INCOMING_SHA="${{ github.event.client_payload.sha }}"
+          # Fetch latest vault commits so we can resolve SHAs
+          git -C src/content fetch origin
+
+          # Incoming SHA: from dispatch payload, or latest vault main for manual run
+          if [ -n "${{ github.event.client_payload.sha }}" ]; then
+            INCOMING_SHA="${{ github.event.client_payload.sha }}"
+            echo "Source: repository_dispatch"
+          else
+            INCOMING_SHA=$(git -C src/content rev-parse origin/main)
+            echo "Source: workflow_dispatch — using latest vault main"
+          fi
+
           echo "incoming_sha=$INCOMING_SHA" >> $GITHUB_OUTPUT
           echo "Incoming SHA: $INCOMING_SHA"
 
@@ -35,7 +45,7 @@ jobs:
         run: |
           if [ "${{ steps.shas.outputs.prev_sha }}" = "${{ steps.shas.outputs.incoming_sha }}" ]; then
             echo "changed=false" >> $GITHUB_OUTPUT
-            echo "Submodule already at this SHA. Skipping."
+            echo "Submodule already at this SHA. Nothing to do."
           else
             echo "changed=true" >> $GITHUB_OUTPUT
           fi
@@ -63,7 +73,6 @@ jobs:
           steps.sha_diff.outputs.changed == 'true' &&
           steps.md_check.outputs.has_md == 'true'
         run: |
-          git -C src/content fetch origin
           git -C src/content checkout ${{ steps.shas.outputs.incoming_sha }}
           echo "Submodule updated to ${{ steps.shas.outputs.incoming_sha }}"
 
