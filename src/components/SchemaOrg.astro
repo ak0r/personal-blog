@@ -19,6 +19,7 @@
 import type { CollectionEntry } from 'astro:content';
 import { siteConfig } from '@/site.config';
 import type { Crumb } from '@/utils/breadcrumb.utils';
+import { getPostUrl } from '@/utils/content.utils';
 
 type SchemaType = 'article' | 'breadcrumb' | 'website';
 
@@ -46,7 +47,7 @@ const person = {
 
 function buildArticle(entry: CollectionEntry<'posts'>) {
   const { title, description, published, updated, cover, tags, lang } = entry.data;
-  const canonicalUrl = new URL(`/posts/${entry.id}`, siteUrl).href;
+  const canonicalUrl = new URL(getPostUrl(entry), siteUrl).href;
   const imageUrl = cover
     ? new URL(cover, siteUrl).href
     : new URL('/og/default.png', siteUrl).href;

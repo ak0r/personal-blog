@@ -1,5 +1,6 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import { getEntry } from "astro:content";
 import { Picture } from 'astro:assets';
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import SEO from "@/components/SEO.astro";
@@ -16,10 +17,11 @@ import {
   getSeriesPosts,
   getRelatedPosts,
   calculateReadingTime,
+  getPostUrl,
+  toDestinationId,
 } from "@/utils/content.utils";
 import { getGalleryImages, getCoverImage } from '@/utils/image.utils';
 import PostGallery from '@/components/PostGallery.astro';
-import PostCategory from '@/components/PostCategory.astro';
 import { siteConfig } from "@/site.config";
 import GalleryInit from '@/components/GalleryInit.astro';
 import Breadcrumb from '@/components/Breadcrumb.astro';
@@ -29,20 +31,42 @@ interface Props {
 }
 
 const { entry } = Astro.props;
-const { title, description, published, updated, tags, cover, series, category, location } = entry.data;
+const {
+  title,
+  description,
+  published,
+  updated,
+  tags,
+  cover,
+  series,
+  category,
+  countries,   // z.array(z.string()) — plain strings e.g. ["India", "Japan"]
+  region,      // e.g. "Sahyadri"
+  places,      // e.g. ["Rajgad", "Pune"]
+} = entry.data;
 
-const allPosts    = await getPublishedPosts();
-const related     = getRelatedPosts(entry, allPosts, siteConfig.relatedPosts);
-const seriesPosts = series ? await getSeriesPosts(series) : [];
-const readTime    = calculateReadingTime(entry.body ?? "").text;
+// Primary country for display — first in list
+const primaryCountry   = countries?.[0] ?? null;
+const primaryCountryId = primaryCountry ? toDestinationId(primaryCountry) : null;
+
+// Resolve destination entry for pagefind meta only
+const destinationEntry = primaryCountryId
+  ? await getEntry('destinations', primaryCountryId).catch(() => null)
+  : null;
+
+const allPosts      = await getPublishedPosts();
+const related       = getRelatedPosts(entry, allPosts, siteConfig.relatedPosts);
+const seriesPosts   = series ? await getSeriesPosts(series) : [];
+const readTime      = calculateReadingTime(entry.body ?? "").text;
 const galleryImages = getGalleryImages(entry.filePath);
-const coverImage  = getCoverImage(cover);
-const ogImage     = `/og/posts/${entry.id}.png`;
+const coverImage    = getCoverImage(cover);
+const ogImage       = `/og/posts/${entry.id}.png`;
 
-// Prev / next for post navigation
 const currentIndex = allPosts.findIndex((p) => p.id === entry.id);
 const prev = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
 const next = currentIndex > 0                   ? allPosts[currentIndex - 1] : null;
+
+const canonicalPath = getPostUrl(entry);
 ---
 
 <BaseLayout>
@@ -60,21 +84,33 @@ const next = currentIndex > 0                   ? allPosts[currentIndex - 1] : n
   <Fragment slot="header">
     <Breadcrumb label={title} />
 
-    {(category || location) && (
+    {/* ── Eyebrow ────────────────────────────────────────────────────────
+        [India]  Sahyadri
+        Only shown for travel posts with a country set.
+    ─────────────────────────────────────────────────────────────────── */}
+    {primaryCountry && (
       <div class="post-eyebrow">
-        {category && <PostCategory {category} />}
-        {location && (
-          <span class="post-eyebrow__location">
-            <Icon name="map-pin" size={13} />
-            {location}
-          </span>
+        <a
+          href={`/destinations/${primaryCountryId}/`}
+          class="post-eyebrow__country badge badge--subtle badge--accent badge--country"
+        >
+          {primaryCountry}
+        </a>
+        {region && (
+          <span class="post-eyebrow__region">{region}</span>
         )}
       </div>
     )}
 
     <ContentHeader {title} pagefind>
       <Fragment slot="meta">
-        <PostMeta {published} {updated} {readTime} {tags} />
+        <PostMeta
+          {published}
+          {updated}
+          {readTime}
+          {tags}
+          {places}
+        />
       </Fragment>
     </ContentHeader>
   </Fragment>
@@ -84,7 +120,13 @@ const next = currentIndex > 0                   ? allPosts[currentIndex - 1] : n
       <meta data-pagefind-meta="title[content]" content={entry.data.title} />
       <meta data-pagefind-sort="date[content]" content={published.toISOString()} />
       <meta data-pagefind-filter="collection[content]" content={category} />
-      {tags && tags.map((tag) => (
+      {destinationEntry && (
+        <meta data-pagefind-filter="destination[content]" content={destinationEntry.data.title} />
+      )}
+      {places?.map((place) => (
+        <meta data-pagefind-filter="place[content]" content={place} />
+      ))}
+      {tags?.map((tag) => (
         <meta data-pagefind-filter="tag[content]" content={tag} />
       ))}
 

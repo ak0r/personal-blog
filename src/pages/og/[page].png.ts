@@ -1,18 +1,24 @@
 /**
  * src/pages/og/[page].png.ts
  *
- * Static OG images for non-post pages using @vercel/og — same approach as
- * posts/[...slug].png.ts for consistency and Astro 6 compatibility.
+ * Static OG images for non-post pages using @vercel/og.
  *
- * Output: /og/default.png, /og/posts.png, /og/tags.png, /og/about.png,
- *         /og/search.png, /og/posts-travel.png, /og/posts-tech.png
+ * Output examples:
+ *   /og/default.png
+ *   /og/travel.png
+ *   /og/travel-india.png
+ *   /og/tech.png
+ *   /og/destinations.png
+ *   /og/tags.png
+ *   /og/about.png
+ *   /og/search.png
  */
 
 import type { APIRoute, GetStaticPaths } from 'astro';
 import { ImageResponse } from '@vercel/og';
 import { siteConfig } from '@/site.config';
 
-// ── Palette (matches [...slug].png.ts) ────────────────────────────────────────
+// ── Palette ───────────────────────────────────────────────────────────────────
 
 const C = {
   bg:      '#faf9f5',
@@ -22,6 +28,7 @@ const C = {
   subtle:  '#87867f',
   divider: '#d1cfc5',
   accent:  '#3AA99F',
+  olive:   '#788c5d',
   clay:    '#d97757',
   sky:     '#6a9bcc',
 } as const;
@@ -29,29 +36,10 @@ const C = {
 // ── Page definitions ──────────────────────────────────────────────────────────
 
 const PAGES = {
+  // ── Core ───────────────────────────────────────────────────────────────────
   'default': {
     title:       siteConfig.title,
     description: siteConfig.description,
-    border:      C.accent,
-  },
-  'posts': {
-    title:       'Articles',
-    description: 'Travel stories and tech writing',
-    border:      C.accent,
-  },
-  'posts-travel': {
-    title:       'Travel',
-    description: 'Forts, temples, and roads less taken — travel writing from the Sahyadris, across India, and beyond.',
-    border:      C.clay,
-  },
-  'posts-tech': {
-    title:       'Tech',
-    description: 'Notes on building things — self-hosted infrastructure, developer tooling, and systems that stay out of the way.',
-    border:      C.sky,
-  },
-  'tags': {
-    title:       'Tags',
-    description: 'Browse posts by topic',
     border:      C.accent,
   },
   'about': {
@@ -63,6 +51,76 @@ const PAGES = {
     title:       'Search',
     description: `Search across all posts on ${siteConfig.title}`,
     border:      C.accent,
+  },
+  'tags': {
+    title:       'Tags',
+    description: 'Browse posts by topic',
+    border:      C.accent,
+  },
+  'posts': {
+    title:       'Articles',
+    description: 'Travel stories and tech writing',
+    border:      C.accent,
+  },
+
+  // ── Travel ─────────────────────────────────────────────────────────────────
+  'travel': {
+    title:       'Travel',
+    description: 'Travel writing from across India and the world — forts, roads, cities, and everything in between.',
+    border:      C.olive,
+  },
+
+  // ── Destinations ───────────────────────────────────────────────────────────
+  'destinations': {
+    title:       'Destinations',
+    description: 'Every country and place covered — a reference index of the world explored so far.',
+    border:      C.olive,
+  },
+
+  // ── Tech ───────────────────────────────────────────────────────────────────
+  'tech': {
+    title:       'Tech',
+    description: 'Notes on building things — self-hosted infrastructure, developer tooling, and systems that stay out of the way.',
+    border:      C.sky,
+  },
+
+  // ── Per-country travel pages ────────────────────────────────────────────────
+  'travel-india': {
+    title:       'India',
+    description: 'Forts, temples, and roads less taken — travel writing from the Sahyadris, across India, and beyond.',
+    border:      C.olive,
+  },
+  'travel-japan': {
+    title:       'Japan',
+    description: 'Temples, train rides, and quiet streets — travel writing from across Japan.',
+    border:      C.olive,
+  },
+  'travel-vietnam': {
+    title:       'Vietnam',
+    description: 'Street food, motorbikes, and coastlines — travel writing from Vietnam.',
+    border:      C.olive,
+  },
+  'travel-france': {
+    title:       'France',
+    description: 'Markets, villages, and slow afternoons — travel writing from France.',
+    border:      C.olive,
+  },
+  'travel-netherlands': {
+    title:       'Netherlands',
+    description: 'Canals, bikes, and open skies — travel writing from the Netherlands.',
+    border:      C.olive,
+  },
+
+  // ── Legacy (kept so existing OG image URLs don't 404) ─────────────────────
+  'posts-travel': {
+    title:       'Travel',
+    description: 'Forts, temples, and roads less taken — travel writing from the Sahyadris, across India, and beyond.',
+    border:      C.olive,
+  },
+  'posts-tech': {
+    title:       'Tech',
+    description: 'Notes on building things — self-hosted infrastructure, developer tooling, and systems that stay out of the way.',
+    border:      C.sky,
   },
 } as const;
 

@@ -10,7 +10,7 @@
 
   /* ── PostList ───────────────────────────────────── */
   .year-group {
-    @apply mb-8;
+    @apply mb-10;
   }
 
   .year-heading {
@@ -18,7 +18,7 @@
   }
 
   .post-list {
-    @apply list-none p-0 flex flex-col gap-2;
+    @apply list-none p-0 flex flex-col gap-4;
   }
 
   /* ── PostItem ───────────────────────────────────── */
@@ -60,10 +60,27 @@
     @apply text-foreground-minimal text-xs font-medium uppercase tracking-wide;
   }
 
+  /* ── Post meta ── */
+  .post-meta__line {
+    @apply flex flex-wrap items-center gap-x-2 gap-y-1;
+  }
+
+  .post-meta__places {
+    @apply text-foreground-subtle;
+  }
+
+  .post-meta__tags {
+    @apply flex flex-wrap gap-x-3 gap-y-1 mt-1;
+  }
+
+  .post-tag {
+    @apply text-sm text-foreground-subtle;
+  }
+/* 
   .post-tag {
     @apply no-underline text-foreground-subtle inline-flex items-center gap-1;
     &:hover { @apply text-foreground; }
-  }
+  } */
 
   /* ── ContentHeader ───────────────────────────────── */
   .content-header {
@@ -92,17 +109,26 @@
     @apply mb-10;
   }
 
-  /* ── Post eyebrow — category + location above title ─ */
+  /* ── Post eyebrow ── */
   .post-eyebrow {
     @apply flex items-center gap-3 mb-3;
   }
 
-  .post-eyebrow__location {
-    @apply flex items-center gap-1.5 text-sm text-foreground-subtle;
+  .post-eyebrow__country {
+    /* inherits badge badge--accent — accent coloured pill */
+    @apply text-sm font-medium no-underline;
+  }
+
+  .post-eyebrow__region {
+    @apply text-sm text-foreground-subtle;
   }
 
   /* Category badge in eyebrow — larger than list badge */
   .badge--category {
+    @apply text-xs md:text-sm px-1.5 md:px-2.5 py-1 md:font-medium;
+  }
+
+  .badge--country {
     @apply text-xs md:text-sm px-1.5 md:px-2.5 py-1 md:font-medium;
   }
 
@@ -397,6 +423,62 @@
     color: var(--color-error);
   }
 
+  /* ── Filter bar ─────────────────────────────────────────────────────────
+     Used on /travel/ and /tech/ for client-side post filtering.
+  ──────────────────────────────────────────────────────────────────────── */
+
+  .filter-bar {
+    @apply flex flex-col gap-4 mb-8 pb-6 border-b border-border;
+  }
+
+  .filter-group {
+    @apply flex flex-col gap-2 sm:flex-row sm:items-start sm:gap-4;
+  }
+
+  .filter-group__label {
+    @apply text-xs font-medium uppercase tracking-widest text-foreground-subtle
+           shrink-0 pt-1 w-24;
+  }
+
+  .filter-group__pills {
+    @apply flex flex-wrap gap-2;
+  }
+
+  .filter-pill {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-sm
+           bg-background-subtle text-foreground-subtle
+           border border-transparent
+           transition-all duration-150 cursor-pointer;
+    &:hover {
+      @apply text-foreground bg-background-minimal;
+    }
+  }
+
+  .filter-pill--active {
+    @apply text-foreground font-medium;
+    background: color-mix(in srgb, var(--accent) 12%, transparent);
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+    color: var(--accent);
+  }
+
+  .filter-bar__status {
+    @apply flex items-center gap-3 text-sm text-foreground-subtle;
+  }
+
+  .filter-clear {
+    @apply text-sm text-foreground-subtle underline underline-offset-2
+           cursor-pointer transition-colors duration-150;
+    &:hover { @apply text-foreground; }
+  }
+
+  .filter-empty {
+    @apply text-foreground-subtle text-sm py-8 text-center;
+  }
+
+  .filter-item[hidden] {
+    display: none;
+  }
+
   /* ── 404 ────────────────────────────────────────── */
   .not-found {
     @apply flex flex-col items-start gap-4 py-16;
@@ -494,4 +576,114 @@
   .bg-heather { background-color: #cbcadb!important; }
   .bg-fig     { background-color: #c46686!important; }
   .bg-coral   { background-color: #ebcece!important; }
+
+  /* ── Destination cards ───────────────────────────────── */
+  .destination-grid {
+    @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-3;
+  }
+
+  .destination-card {
+    @apply no-underline flex flex-col overflow-hidden;
+    &::after { content: none !important; }
+  }
+
+  .destination-card__image {
+    @apply aspect-video overflow-hidden bg-background-subtle;
+    img { @apply w-full h-full object-cover transition-transform duration-300; }
+  }
+
+  .destination-card:hover .destination-card__image img {
+    @apply scale-105;
+  }
+
+  .destination-card__image--placeholder {
+    @apply bg-background-minimal;
+  }
+
+  .destination-card__body {
+    @apply p-4 flex flex-col gap-1;
+  }
+
+  .destination-card__name {
+    @apply text-lg font-semibold text-foreground m-0;
+  }
+
+  .destination-card__tagline {
+    @apply text-sm text-foreground-subtle m-0;
+  }
+
+  .destination-card__count {
+    @apply text-xs text-foreground-minimal mt-1;
+  }
+
+  .destination-places {
+    @apply text-sm text-foreground-subtle;
+  }
+
+  /* ── Destinations list ───────────────────────────────── */
+  .destinations-list {
+    @apply flex flex-col divide-y divide-border;
+  }
+
+  .destinations-entry {
+    @apply py-6 flex flex-col gap-3;
+  }
+
+  .destinations-entry__header {
+    @apply flex items-baseline justify-between gap-4;
+  }
+
+  .destinations-entry__name {
+    @apply text-xl font-semibold text-foreground no-underline;
+    &:hover { @apply text-accent; }
+    &::after { content: none !important; }
+  }
+
+  .destinations-entry__count {
+    @apply text-sm text-foreground-minimal shrink-0;
+  }
+
+  .destinations-entry__places {
+    @apply flex flex-wrap gap-2 list-none p-0 m-0;
+  }
+
+  .destinations-entry__place {
+    @apply text-sm text-foreground-subtle
+          bg-background-subtle px-2.5 py-0.5 rounded-full;
+  }
+
+  /* ── Destination detail (/destinations/[country]/) ─── */
+  .destination-hero {
+    @apply mb-8 rounded-lg overflow-hidden;
+    img { @apply w-full block; }
+  }
+
+  .destination-detail__places {
+    @apply flex items-start gap-2 mb-6 text-foreground-subtle;
+  }
+
+  .destination-detail__place-list {
+    @apply flex flex-wrap gap-2 list-none p-0 m-0;
+  }
+
+  .destination-detail__place {
+    @apply text-sm text-foreground-subtle
+          bg-background-subtle px-2.5 py-0.5 rounded-full;
+  }
+
+  .destination-detail__body {
+    @apply mb-8;
+  }
+
+  .destination-detail__cta {
+    @apply pt-8 border-t border-border;
+  }
+
+  .destination-detail__posts {
+    @apply mt-8 pt-6 border-t border-border;
+  }
+
+  .destination-detail__empty {
+    @apply text-sm text-foreground-subtle mt-8 pt-6 border-t border-border;
+  }
 }

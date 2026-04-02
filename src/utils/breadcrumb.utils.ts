@@ -1,59 +1,107 @@
 /**
  * Breadcrumb Utilities
  *
- * Shared crumb type and builder used by both Breadcrumb.astro
- * and SchemaOrg.astro so the same data drives both the visual
- * breadcrumb trail and the BreadcrumbList JSON-LD schema.
+ * Route map (0.7.0):
+ *   /travel/              Travel
+ *   /travel/[slug]        Travel → Post title
+ *   /tech/                Tech
+ *   /tech/[slug]          Tech → Post title
+ *   /destinations/        Destinations
+ *   /destinations/[id]/   Destinations → Country name
+ *   /[page]               Page title
  */
 
 export interface Crumb {
   title: string;
-  href: string;
+  href:  string;
 }
+
+const SEGMENT_LABELS: Record<string, string> = {
+  travel:       'Travel',
+  tech:         'Tech',
+  destinations: 'Destinations',
+  search:       'Search',
+  about:        'About',
+};
 
 export function buildCrumbs(pathname: string, label?: string): Crumb[] {
   const crumbs: Crumb[] = [{ title: 'Home', href: '/' }];
 
   if (pathname === '/') return crumbs;
 
-  // Strip pagination segments e.g. /posts/travel/2 → /posts/travel
-  const cleanPath = pathname.replace(/\/\d+\/?$/, '');
-  const segments = cleanPath.replace(/\/$/, '').split('/').filter(Boolean);
+  // Strip trailing slash and pagination segments
+  const cleanPath = pathname
+    .replace(/\/$/, '')
+    .replace(/\/\d+$/, '');
 
-  if (segments[0] === 'posts') {
-    crumbs.push({ title: 'Articles', href: '/posts' });
+  const segments = cleanPath.split('/').filter(Boolean);
 
-    if (segments[1]) {
-      // Category page — generalised, stays in sync with post.schema.ts enum
-      const CATEGORIES = ['travel', 'tech'];
+  if (segments.length === 0) return crumbs;
 
-      if (CATEGORIES.includes(segments[1])) {
-        crumbs.push({
-          title: segments[1].charAt(0).toUpperCase() + segments[1].slice(1),
-          href:  `/posts/${segments[1]}`,
-        });
-      } else {
-        // Individual post slug
-        crumbs.push({
-          title: label || segments[1].replace(/-/g, ' '),
-          href:  pathname,
-        });
-      }
-    }
-  } else if (segments[0] === 'tags') {
-    crumbs.push({ title: 'Tags', href: '/tags' });
-    if (segments[1]) {
+  const [first, second] = segments;
+
+  // ── /travel/* ──────────────────────────────────────────────────────────────
+
+  if (first === 'travel') {
+    crumbs.push({ title: 'Travel', href: '/travel' });
+
+    if (second) {
+      // Individual post — label passed from BlogLayout
       crumbs.push({
-        title: `#${segments[1]}`,
+        title: label || slugToLabel(second),
         href:  pathname,
       });
     }
-  } else {
-    crumbs.push({
-      title: label || segments[0].replace(/-/g, ' '),
-      href:  pathname,
-    });
+
+    return crumbs;
   }
 
+  // ── /tech/* ────────────────────────────────────────────────────────────────
+
+  if (first === 'tech') {
+    crumbs.push({ title: 'Tech', href: '/tech' });
+
+    if (second) {
+      crumbs.push({
+        title: label || slugToLabel(second),
+        href:  pathname,
+      });
+    }
+
+    return crumbs;
+  }
+
+  // ── /destinations/* ────────────────────────────────────────────────────────
+
+  if (first === 'destinations') {
+    crumbs.push({ title: 'Destinations', href: '/destinations' });
+
+    if (second) {
+      // Country page — label is the country name passed from the page
+      crumbs.push({
+        title: label || slugToLabel(second),
+        href:  pathname,
+      });
+    }
+
+    return crumbs;
+  }
+
+  // ── Static pages e.g. /about, /search ──────────────────────────────────────
+
+  crumbs.push({
+    title: label || SEGMENT_LABELS[first] || slugToLabel(first),
+    href:  pathname,
+  });
+
   return crumbs;
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
+
+function slugToLabel(slug: string): string {
+  return slug
+    .split('-')
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
 }

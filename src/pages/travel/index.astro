@@ -1,0 +1,97 @@
+---
+/**
+ * /travel/
+ *
+ * All travel posts with client-side filtering.
+ * Filter dimensions: type, tag, destination
+ * URL state: /travel/?type=journey&tag=hiking&destination=india
+ *
+ * Year groupings are rendered at build time.
+ * The filter script hides individual items but also hides year headings
+ * when all posts in that year are filtered out.
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SEO from '@/components/SEO.astro';
+import ContentHeader from '@/components/ContentHeader.astro';
+import Breadcrumb from '@/components/Breadcrumb.astro';
+import PostItem from '@/components/PostItem.astro';
+import FilterBar from '@/components/FilterBar.astro';
+import {
+  getTravelPosts,
+  getAllDestinations,
+  getTravelTags,
+  groupByYear,
+  getCountryIds,
+  toDestinationId
+} from '@/utils/content.utils';
+
+const posts        = await getTravelPosts();
+const destinations = await getAllDestinations();
+const tagMap       = await getTravelTags();
+const grouped      = groupByYear(posts);
+
+// Types present in actual posts
+const types = [...new Set(
+  posts.map((p) => p.data.type).filter((t): t is string => !!t)
+)].sort();
+
+const tags = [...tagMap.keys()];
+
+// Destinations with at least one post
+const destIds = new Set(
+  posts.flatMap((p) => p.data.countries?.map((c: any) =>
+    typeof c === 'string' ? toDestinationId(c) : c.id
+  ) ?? [])
+);
+const activeDests = destinations
+  .filter((d) => destIds.has(d.id))
+  .map((d) => ({ id: d.id, name: d.data.title }));
+---
+
+<BaseLayout>
+  <SEO
+    slot="seo"
+    title="Travel"
+    description="Travel writing from across India and the world — forts, roads, cities, and everything in between."
+    ogImage="/og/travel.png"
+  />
+
+  <Breadcrumb />
+  <ContentHeader
+    title="Travel"
+    subheading="Forts, roads, cities, and everything in between."
+  />
+
+  <FilterBar
+    dimensions={['type', 'tag', 'destination']}
+    {types}
+    {tags}
+    destinations={activeDests}
+    listId="travel-post-list"
+  />
+
+  <div class="post-list-container" id="travel-post-list">
+    {[...grouped.entries()].map(([year, yearPosts]) => (
+      <div class="year-group" data-year={year}>
+        <h2 class="year-heading">{year}</h2>
+        <div class="post-list">
+          {yearPosts.map((post) => (
+            <div
+              class="filter-item"
+              data-type={post.data.type ?? ''}
+              data-tags={JSON.stringify(post.data.tags ?? [])}
+              data-destination={getCountryIds(post).join(',')}
+              data-year={year}
+            >
+              <PostItem {post} />
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <p class="filter-empty" id="filter-empty" hidden>
+    No posts match the current filters.
+  </p>
+</BaseLayout>

@@ -7,6 +7,7 @@ import expressiveCode from "astro-expressive-code";
 import remarkCallouts from './src/utils/remark-callouts';
 import { remarkObsidianCore } from './src/utils/remark-obsidian-core';
 import { remarkImageProcessing } from './src/utils/remark-image-processing';
+import { siteConfig } from './src/site.config.ts';
 
 // https://astro.build/config
 export default defineConfig({
@@ -85,29 +86,16 @@ export default defineConfig({
     mdx(), 
     sitemap({
       serialize(item) {
-        // Priority hints — higher for content, lower for utility pages
-        if (item.url === 'https://base.amitkul.in/') {
-          item.priority = 1.0;
-        } else if (
-          item.url.includes('/posts/travel') ||
-          item.url.includes('/posts/tech')
-        ) {
-          item.priority = 0.8;
-        } else if (item.url.includes('/posts/')) {
-          item.priority = 0.7;
-        } else if (item.url.includes('/tags/')) {
-          item.priority = 0.5;
-        } else if (
-          item.url.includes('/search') ||
-          item.url.includes('/404')
-        ) {
-          item.priority = 0.3;
-        } else {
-          item.priority = 0.6;
-        }
-        return item;
+        const base = siteConfig.url.replace(/\/$/, '');
+
+        if (item.url === base + '/')                                     return { ...item, priority: 1.0 };
+        if (/\/(travel|tech|destinations)\/$/.test(item.url))            return { ...item, priority: 0.9 };
+        if (/\/destinations\/[^/]+\/$/.test(item.url))                   return { ...item, priority: 0.8 };
+        if (/\/(travel|tech)\/[^/]+\/$/.test(item.url))                  return { ...item, priority: 0.7 };
+        if (/\/(about|search)\/$/.test(item.url))                        return { ...item, priority: 0.5 };
+        return { ...item, priority: 0.3 };
       },
-    }),
+    })
   ],
 
   vite: {

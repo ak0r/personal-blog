@@ -1,9 +1,10 @@
 ---
 import type { CollectionEntry } from "astro:content";
+import { getPostUrl } from "@/utils/content.utils";
 
 interface Props {
   current: CollectionEntry<"posts">;
-  posts: CollectionEntry<"posts">[];
+  posts:   CollectionEntry<"posts">[];
 }
 
 const { current, posts } = Astro.props;
@@ -23,11 +24,16 @@ const next = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
 
     <ol class="series-nav__list">
       {posts.map((post) => (
-        <li class:list={["card card--interactive card--padded series-nav__item", { "series-nav__item--current": post.id === current.id }]}>
+        <li class:list={[
+          "card card--interactive card--padded series-nav__item",
+          { "series-nav__item--current": post.id === current.id }
+        ]}>
           {post.id === current.id ? (
             <span class="series-nav__item-title">{post.data.title}</span>
           ) : (
-            <a href={`/posts/${post.id}`} class="series-nav__item-title">{post.data.title}</a>
+            <a href={getPostUrl(post)} class="series-nav__item-title">
+              {post.data.title}
+            </a>
           )}
         </li>
       ))}
@@ -36,13 +42,13 @@ const next = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : null;
     {(prev || next) && (
       <div class="series-nav__pagination">
         {prev && (
-          <a href={`/posts/${prev.id}`} class="series-nav__link series-nav__link--prev">
+          <a href={getPostUrl(prev)} class="series-nav__link series-nav__link--prev">
             <span class="series-nav__link-label">← Previous</span>
             <span class="series-nav__link-title">{prev.data.title}</span>
           </a>
         )}
         {next && (
-          <a href={`/posts/${next.id}`} class="series-nav__link series-nav__link--next">
+          <a href={getPostUrl(next)} class="series-nav__link series-nav__link--next">
             <span class="series-nav__link-label">Next →</span>
             <span class="series-nav__link-title">{next.data.title}</span>
           </a>

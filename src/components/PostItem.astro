@@ -10,6 +10,7 @@
 import type { CollectionEntry } from "astro:content";
 import PostMeta from "@/components/PostMeta.astro";
 import PostCategory from "@/components/PostCategory.astro";
+import { getPostUrl } from "@/utils/content.utils";
 
 interface Props {
   post: CollectionEntry<"posts">;
@@ -17,14 +18,15 @@ interface Props {
 
 const { post } = Astro.props;
 const { category } = post.data;
+const href = getPostUrl(post);
 ---
 
 <div class="card card--interactive card--padded post-item">
-  <a href={`/posts/${post.id}`} class="post-item__link">
+  <a href={href} class="post-item__link">
     {post.data.title}
   </a>
   <div class="post-item__meta">
-    {category && <PostCategory category={category} />}
+    {category && <PostCategory {category} />}
     <PostMeta published={post.data.published} />
   </div>
 </div>

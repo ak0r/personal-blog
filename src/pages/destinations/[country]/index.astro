@@ -1,0 +1,95 @@
+---
+/**
+ * /destinations/[country]/
+ *
+ * Country detail page.
+ * Shows: cover, name, description, places, then all posts for that country.
+ *
+ * getStaticPaths driven by destinations collection.
+ */
+import { render } from 'astro:content';
+import { Picture } from 'astro:assets';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SEO from '@/components/SEO.astro';
+import ContentHeader from '@/components/ContentHeader.astro';
+import Breadcrumb from '@/components/Breadcrumb.astro';
+import Icon from '@/components/Icon.astro';
+import PostList from '@/components/PostList.astro';
+import {
+  getAllDestinations,
+  getPlacesByDestination,
+  getTravelPostsByCountry,
+} from '@/utils/content.utils';
+
+export async function getStaticPaths() {
+  const destinations = await getAllDestinations();
+  return destinations.map((dest) => ({
+    params: { country: dest.id },
+    props:  { dest },
+  }));
+}
+
+const { dest } = Astro.props;
+
+const { Content } = await render(dest);
+
+const placesByDest = await getPlacesByDestination();
+const posts        = await getTravelPostsByCountry(dest.id);
+const places       = placesByDest.get(dest.id) ?? [];
+const count        = posts.length;
+---
+
+<BaseLayout>
+  <SEO
+    slot="seo"
+    title={dest.data.title}
+    description={dest.data.description ?? `Travel posts from ${dest.data.title}`}
+    ogImage={`/og/travel-${dest.id}.png`}
+  />
+
+  <Breadcrumb label={dest.data.title} />
+
+  {dest.data.cover && (
+    <figure class="destination-hero">
+      <Picture
+        src={dest.data.cover}
+        alt={dest.data.title}
+        width={900}
+        height={500}
+        formats={['avif', 'webp']}
+        loading="eager"
+        decoding="async"
+      />
+    </figure>
+  )}
+
+  <ContentHeader title={dest.data.title} subheading={dest.data.description} />
+
+  {places.length > 0 && (
+    <div class="destination-detail__places">
+      <Icon name="map-pin" size={13} />
+      <ul class="destination-detail__place-list" aria-label="Places visited">
+        {places.map((place) => (
+          <li class="destination-detail__place">{place}</li>
+        ))}
+      </ul>
+    </div>
+  )}
+
+  {dest.body && (
+    <div class="post-content destination-detail__body">
+      <Content />
+    </div>
+  )}
+
+  {count > 0 ? (
+    <section class="destination-detail__posts">
+      <h2 class="home-section-heading">
+        {count} {count === 1 ? 'post' : 'posts'}
+      </h2>
+      <PostList posts={posts} />
+    </section>
+  ) : (
+    <p class="destination-detail__empty">Posts coming soon.</p>
+  )}
+</BaseLayout>

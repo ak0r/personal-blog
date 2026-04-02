@@ -1,0 +1,233 @@
+---
+/**
+ * FilterBar.astro
+ *
+ * Client-side filter bar for post listing pages.
+ * Reads and writes URL search params — bookmarkable, shareable.
+ *
+ * Dimensions:
+ *   type        — post type enum (journey, experience, guide, photowalk, notes)
+ *   tag         — post tags
+ *   destination — destination collection id
+ *
+ * The component expects:
+ *   - A container with id matching `listId`
+ *   - .filter-item wrappers with data-type, data-tags, data-destination
+ *   - Optional .year-group wrappers — hidden automatically when all their
+ *     items are filtered out
+ *   - A #filter-empty element for the empty state message
+ */
+
+type Dimension = 'type' | 'tag' | 'destination';
+
+interface DestinationOption {
+  id:   string;
+  name: string;
+}
+
+interface Props {
+  dimensions:    Dimension[];
+  types?:        string[];
+  tags?:         string[];
+  destinations?: DestinationOption[];
+  listId:        string;
+}
+
+const {
+  dimensions,
+  types        = [],
+  tags         = [],
+  destinations = [],
+  listId,
+} = Astro.props;
+
+const show = {
+  type:        dimensions.includes('type'),
+  tag:         dimensions.includes('tag'),
+  destination: dimensions.includes('destination'),
+};
+
+const TYPE_LABELS: Record<string, string> = {
+  journey:    'Journey',
+  experience: 'Experience',
+  guide:      'Guide',
+  photowalk:  'Photowalk',
+  notes:      'Notes',
+};
+---
+
+<div
+  class="filter-bar"
+  id="filter-bar"
+  data-list-id={listId}
+  data-dimensions={JSON.stringify(dimensions)}
+>
+
+  {show.type && types.length > 0 && (
+    <div class="filter-group">
+      <span class="filter-group__label">Type</span>
+      <div class="filter-group__pills" role="group" aria-label="Filter by type">
+        {types.map((type) => (
+          <button
+            class="filter-pill"
+            data-filter-dim="type"
+            data-filter-val={type}
+            aria-pressed="false"
+          >
+            {TYPE_LABELS[type] ?? type}
+          </button>
+        ))}
+      </div>
+    </div>
+  )}
+
+  {show.tag && tags.length > 0 && (
+    <div class="filter-group">
+      <span class="filter-group__label">Tags</span>
+      <div class="filter-group__pills" role="group" aria-label="Filter by tag">
+        {tags.map((tag) => (
+          <button
+            class="filter-pill"
+            data-filter-dim="tag"
+            data-filter-val={tag}
+            aria-pressed="false"
+          >
+            #{tag}
+          </button>
+        ))}
+      </div>
+    </div>
+  )}
+
+  {show.destination && destinations.length > 0 && (
+    <div class="filter-group">
+      <span class="filter-group__label">Destination</span>
+      <div class="filter-group__pills" role="group" aria-label="Filter by destination">
+        {destinations.map((dest) => (
+          <button
+            class="filter-pill"
+            data-filter-dim="destination"
+            data-filter-val={dest.id}
+            aria-pressed="false"
+          >
+            {dest.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  )}
+
+  <div class="filter-bar__status" id="filter-status" aria-live="polite" hidden>
+    <span id="filter-count"></span>
+    <button class="filter-clear" id="filter-clear" aria-label="Clear all filters">
+      Clear filters
+    </button>
+  </div>
+
+</div>
+
+<script>
+  function initFilterBar() {
+    const bar = document.getElementById('filter-bar');
+    if (!bar) return;
+
+    const listId     = bar.dataset.listId!;
+    const dimensions = JSON.parse(bar.dataset.dimensions ?? '[]') as string[];
+
+    const list       = document.getElementById(listId);
+    const items      = list?.querySelectorAll<HTMLElement>('.filter-item') ?? [];
+    const yearGroups = list?.querySelectorAll<HTMLElement>('.year-group') ?? [];
+    const pills      = bar.querySelectorAll<HTMLButtonElement>('.filter-pill');
+    const status     = document.getElementById('filter-status');
+    const count      = document.getElementById('filter-count');
+    const clear      = document.getElementById('filter-clear');
+    const empty      = document.getElementById('filter-empty');
+
+    if (!items.length) return;
+
+    // Initialise active state from URL
+    const params = new URLSearchParams(window.location.search);
+    const active: Record<string, Set<string>> = {};
+    for (const dim of dimensions) {
+      active[dim] = new Set(params.getAll(dim));
+    }
+
+    function applyFilters() {
+      let visible = 0;
+
+      // Filter individual items
+      items.forEach((item) => {
+        let show = true;
+
+        for (const dim of dimensions) {
+          if (!active[dim] || active[dim].size === 0) continue;
+
+          if (dim === 'tag') {
+            const itemTags = JSON.parse(item.dataset.tags ?? '[]') as string[];
+            if (!itemTags.some((t) => active.tag.has(t))) { show = false; break; }
+          } else if (dim === 'type') {
+            if (!active.type.has(item.dataset.type ?? '')) { show = false; break; }
+          } else if (dim === 'destination') {
+            const itemDests = JSON.parse(item.dataset.destination ?? '[]') as string[];
+            if (!itemDests.some((d) => active.destination.has(d))) { show = false; break; }
+          }
+        }
+
+        item.hidden = !show;
+        if (show) visible++;
+      });
+
+      // Hide year groups where all items are filtered out
+      yearGroups.forEach((group) => {
+        const groupItems = group.querySelectorAll<HTMLElement>('.filter-item');
+        const anyVisible = [...groupItems].some((item) => !item.hidden);
+        group.hidden = !anyVisible;
+      });
+
+      // Sync pill pressed state
+      pills.forEach((pill) => {
+        const dim     = pill.dataset.filterDim!;
+        const val     = pill.dataset.filterVal!;
+        const pressed = active[dim]?.has(val) ?? false;
+        pill.setAttribute('aria-pressed', String(pressed));
+        pill.classList.toggle('filter-pill--active', pressed);
+      });
+
+      const hasActive = dimensions.some((d) => (active[d]?.size ?? 0) > 0);
+      if (status) status.hidden = !hasActive;
+      if (count)  count.textContent = `${visible} post${visible === 1 ? '' : 's'}`;
+      if (empty)  empty.hidden = visible > 0;
+    }
+
+    function syncUrl() {
+      const p = new URLSearchParams();
+      for (const dim of dimensions) {
+        for (const val of active[dim] ?? []) p.append(dim, val);
+      }
+      const qs = p.toString();
+      history.replaceState(null, '', qs ? `?${qs}` : window.location.pathname);
+    }
+
+    pills.forEach((pill) => {
+      pill.addEventListener('click', () => {
+        const dim = pill.dataset.filterDim!;
+        const val = pill.dataset.filterVal!;
+        if (!active[dim]) active[dim] = new Set();
+        active[dim].has(val) ? active[dim].delete(val) : active[dim].add(val);
+        syncUrl();
+        applyFilters();
+      });
+    });
+
+    clear?.addEventListener('click', () => {
+      for (const dim of dimensions) active[dim]?.clear();
+      syncUrl();
+      applyFilters();
+    });
+
+    applyFilters();
+  }
+
+  initFilterBar();
+  document.addEventListener('astro:after-swap', initFilterBar);
+</script>

@@ -1,11 +1,12 @@
 ---
 /**
- * Tag — a single tag rendered as a link.
+ * Tag — displays a tag as a plain badge.
+ *
+ * No link — tags are display-only metadata.
+ * Filtering by tag happens on /travel/ and /tech/ via URL params.
  *
  * With count:    #tag (3)
  * Without count: #tag
- *
- * Used by TagList. Can also be used inline wherever a tag link is needed.
  */
 
 interface Props {
@@ -16,9 +17,9 @@ interface Props {
 const { tag, count } = Astro.props;
 ---
 
-<a href={`/tags/${tag}`} class="badge badge--ghost badge--accent tag">
+<span class="badge badge--ghost badge--accent tag">
   <span>#{tag}</span>
   {count !== undefined && (
-    <span class="tag-count">({count})</span>
+    <span class="tag-count badge__count">({count})</span>
   )}
-</a>
+</span>

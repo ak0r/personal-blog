@@ -1,0 +1,80 @@
+---
+/**
+ * /destinations/
+ *
+ * Country cards index.
+ * Shows all entries in the destinations collection.
+ * Post count displayed per card — 0 is fine during content migration.
+ */
+import { Picture } from 'astro:assets';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SEO from '@/components/SEO.astro';
+import ContentHeader from '@/components/ContentHeader.astro';
+import Breadcrumb from '@/components/Breadcrumb.astro';
+import {
+  getAllDestinations,
+  getPostCountByDestination,
+} from '@/utils/content.utils';
+
+const destinations       = await getAllDestinations();
+const postCountByCountry = await getPostCountByDestination();
+const totalPosts         = [...postCountByCountry.values()].reduce((a, b) => a + b, 0);
+
+const statLine = `${destinations.length} ${destinations.length === 1 ? 'country' : 'countries'}${totalPosts > 0 ? ` · ${totalPosts} ${totalPosts === 1 ? 'post' : 'posts'}` : ''}`;
+---
+
+<BaseLayout>
+  <SEO
+    slot="seo"
+    title="Destinations"
+    description="Every country covered on this blog — a reference index of the world explored so far."
+    ogImage="/og/destinations.png"
+  />
+
+  <Breadcrumb />
+  <ContentHeader
+    title="Destinations"
+    subheading={statLine}
+  />
+
+  <div class="destination-grid">
+    {destinations.map((dest) => {
+      const count = postCountByCountry.get(dest.id) ?? 0;
+      return (
+        <a
+          href={`/destinations/${dest.id}/`}
+          class="destination-card card card--interactive"
+          aria-label={`${dest.data.title}${count > 0 ? ` — ${count} ${count === 1 ? 'post' : 'posts'}` : ''}`}
+        >
+          <div class="destination-card__image">
+            {dest.data.cover
+              ? (
+                <Picture
+                  src={dest.data.cover}
+                  alt={dest.data.title}
+                  width={600}
+                  height={400}
+                  formats={['avif', 'webp']}
+                  loading="lazy"
+                />
+              )
+              : <div class="destination-card__image--placeholder" />
+            }
+          </div>
+          <div class="destination-card__body">
+            <h2 class="destination-card__name">{dest.data.title}</h2>
+            {dest.data.description && (
+              <p class="destination-card__description">{dest.data.description}</p>
+            )}
+            <span class="destination-card__count">
+              {count > 0
+                ? `${count} ${count === 1 ? 'post' : 'posts'}`
+                : 'Coming soon'
+              }
+            </span>
+          </div>
+        </a>
+      );
+    })}
+  </div>
+</BaseLayout>

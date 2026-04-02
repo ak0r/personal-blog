@@ -1,0 +1,64 @@
+---
+/**
+ * /tech/
+ *
+ * All tech posts with client-side tag filtering, grouped by year.
+ * URL state: /tech/?tag=homelab&tag=docker
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import SEO from '@/components/SEO.astro';
+import ContentHeader from '@/components/ContentHeader.astro';
+import Breadcrumb from '@/components/Breadcrumb.astro';
+import PostItem from '@/components/PostItem.astro';
+import FilterBar from '@/components/FilterBar.astro';
+import { getTechPosts, getTechTags, groupByYear } from '@/utils/content.utils';
+
+const posts   = await getTechPosts();
+const tagMap  = await getTechTags();
+const grouped = groupByYear(posts);
+const tags    = [...tagMap.keys()];
+---
+
+<BaseLayout>
+  <SEO
+    slot="seo"
+    title="Tech"
+    description="Notes on building things — self-hosted infrastructure, developer tooling, and systems that stay out of the way."
+    ogImage="/og/tech.png"
+  />
+
+  <Breadcrumb />
+  <ContentHeader
+    title="Tech"
+    subheading="Notes on building things — self-hosted infrastructure, developer tooling, and systems that stay out of the way."
+  />
+
+  <FilterBar
+    dimensions={['tag']}
+    {tags}
+    listId="tech-post-list"
+  />
+
+  <div class="post-list-container" id="tech-post-list">
+    {[...grouped.entries()].map(([year, yearPosts]) => (
+      <div class="year-group" data-year={year}>
+        <h2 class="year-heading">{year}</h2>
+        <div class="post-list">
+          {yearPosts.map((post) => (
+            <div
+              class="filter-item"
+              data-tags={JSON.stringify(post.data.tags ?? [])}
+              data-year={year}
+            >
+              <PostItem {post} />
+            </div>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+
+  <p class="filter-empty" id="filter-empty" hidden>
+    No posts match the current filters.
+  </p>
+</BaseLayout>

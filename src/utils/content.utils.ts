@@ -9,12 +9,52 @@ function isDraftVisible(draft: boolean): boolean {
   return isDev || !draft;
 }
 
-// ── Collection queries ─────────────────────────────────────────────────────────
+// ── Normalisation ──────────────────────────────────────────────────────────────
 
 /**
- * All published posts sorted by date descending.
- * Drafts visible in dev, excluded in prod.
+ * Normalise a country name to a destination collection id.
+ * Mirrors what Astro's glob loader does to filenames.
+ *
+ * "India"     → "india"
+ * "Sri Lanka" → "sri-lanka"
+ * "india"     → "india"
  */
+export function toDestinationId(value: string): string {
+  return value.toLowerCase().replace(/\s+/g, "-");
+}
+
+/**
+ * Extract normalised destination ids from a post's countries field.
+ *
+ * Handles both resolved references { id } from reference() and raw
+ * strings — safe during migration when some posts may still have
+ * country names not yet resolved by Astro.
+ */
+export function getCountryIds(post: CollectionEntry<"posts">): string[] {
+  const countries = post.data.countries;
+  if (!countries?.length) return [];
+  return countries.map((c: any) =>
+    typeof c === "string" ? toDestinationId(c) : (c.id ?? toDestinationId(String(c)))
+  );
+}
+
+// ── URL builder ────────────────────────────────────────────────────────────────
+
+/**
+ * Derive the canonical URL for a post.
+ *
+ * Travel posts: /travel/[slug]
+ * Tech posts:   /tech/[slug]
+ */
+export function getPostUrl(post: CollectionEntry<"posts">): string {
+  if (post.data.category === "tech") {
+    return `/tech/${post.id}`;
+  }
+  return `/travel/${post.id}`;
+}
+
+// ── Post queries ───────────────────────────────────────────────────────────────
+
 export async function getPublishedPosts(): Promise<CollectionEntry<"posts">[]> {
   const posts = await getCollection("posts", ({ data }) =>
     isDraftVisible(data.draft)
@@ -24,10 +64,6 @@ export async function getPublishedPosts(): Promise<CollectionEntry<"posts">[]> {
   );
 }
 
-/**
- * Single post by id.
- * Returns undefined if not found or draft in prod.
- */
 export async function getPost(
   id: string
 ): Promise<CollectionEntry<"posts"> | undefined> {
@@ -37,19 +73,114 @@ export async function getPost(
   return posts.find((p) => p.id === id);
 }
 
+export async function getTravelPosts(): Promise<CollectionEntry<"posts">[]> {
+  const posts = await getPublishedPosts();
+  return posts.filter((p) => p.data.category === "travel");
+}
+
 /**
- * All published pages.
- * Drafts visible in dev, excluded in prod.
+ * Travel posts for a specific destination country.
+ * countryId should be normalised e.g. 'india', 'sri-lanka'.
  */
+export async function getTravelPostsByCountry(
+  countryId: string
+): Promise<CollectionEntry<"posts">[]> {
+  const posts = await getTravelPosts();
+  const normalised = toDestinationId(countryId); // normalise the incoming id too
+  return posts.filter((p) => getCountryIds(p).includes(normalised));
+}
+
+export async function getTechPosts(): Promise<CollectionEntry<"posts">[]> {
+  const posts = await getPublishedPosts();
+  return posts.filter((p) => p.data.category === "tech");
+}
+
 export async function getPublishedPages(): Promise<CollectionEntry<"pages">[]> {
   return getCollection("pages", ({ data }) => isDraftVisible(data.draft));
 }
 
-// ── Derived queries ────────────────────────────────────────────────────────────
+// ── Destination queries ────────────────────────────────────────────────────────
+
+export async function getAllDestinations(): Promise<
+  CollectionEntry<"destinations">[]
+> {
+  const destinations = await getCollection("destinations");
+  return destinations.sort((a, b) =>
+    a.data.title.localeCompare(b.data.title)
+  );
+}
 
 /**
- * Posts grouped by publication year, descending.
+ * Aggregate places from posts per destination id.
+ * A post with countries: [India, Japan] contributes places to both.
  */
+export async function getPlacesByDestination(): Promise<Map<string, string[]>> {
+  const posts = await getTravelPosts();
+  const map = new Map<string, string[]>();
+
+  for (const post of posts) {
+    for (const id of getCountryIds(post)) {
+      if (!map.has(id)) map.set(id, []);
+      const existing = map.get(id)!;
+      for (const place of post.data.places ?? []) {
+        if (!existing.includes(place)) existing.push(place);
+      }
+    }
+  }
+
+  for (const [id, places] of map) {
+    map.set(id, [...places].sort((a, b) => a.localeCompare(b)));
+  }
+
+  return map;
+}
+
+/**
+ * Post count per destination id.
+ * A post with countries: [India, Japan] counts once for each country.
+ */
+export async function getPostCountByDestination(): Promise<Map<string, number>> {
+  const posts = await getTravelPosts();
+  const map = new Map<string, number>();
+
+  for (const post of posts) {
+    for (const id of getCountryIds(post)) {
+      map.set(id, (map.get(id) ?? 0) + 1);
+    }
+  }
+
+  return map;
+}
+
+export async function getTravelTags(): Promise<Map<string, number>> {
+  const posts = await getTravelPosts();
+  return buildTagMap(posts);
+}
+
+export async function getTechTags(): Promise<Map<string, number>> {
+  const posts = await getTechPosts();
+  return buildTagMap(posts);
+}
+
+export async function getAllTags(): Promise<Map<string, number>> {
+  const posts = await getPublishedPosts();
+  return buildTagMap(posts);
+}
+
+function buildTagMap(
+  posts: CollectionEntry<"posts">[]
+): Map<string, number> {
+  const tags = new Map<string, number>();
+  for (const post of posts) {
+    for (const tag of post.data.tags ?? []) {
+      tags.set(tag, (tags.get(tag) ?? 0) + 1);
+    }
+  }
+  return new Map([...tags.entries()].sort((a, b) => b[1] - a[1]));
+}
+
+// ── Derived queries ────────────────────────────────────────────────────────────
+
 export async function getPostsByYear(): Promise<
   Map<number, CollectionEntry<"posts">[]>
 > {
@@ -57,35 +188,6 @@ export async function getPostsByYear(): Promise<
   return groupByYear(posts);
 }
 
-/**
- * Posts for a given tag, sorted by date descending.
- */
-export async function getPostsByTag(
-  tag: string
-): Promise<CollectionEntry<"posts">[]> {
-  const posts = await getPublishedPosts();
-  return posts.filter((p) => p.data.tags?.includes(tag));
-}
-
-/**
- * All unique tags with post counts.
- */
-export async function getAllTags(): Promise<Map<string, number>> {
-  const posts = await getPublishedPosts();
-  const tags = new Map<string, number>();
-
-  for (const post of posts) {
-    for (const tag of post.data.tags ?? []) {
-      tags.set(tag, (tags.get(tag) ?? 0) + 1);
-    }
-  }
-
-  return new Map([...tags.entries()].sort((a, b) => b[1] - a[1]));
-}
-
-/**
- * Posts in a series, sorted by order ascending.
- */
 export async function getSeriesPosts(
   series: string
 ): Promise<CollectionEntry<"posts">[]> {
@@ -96,67 +198,71 @@ export async function getSeriesPosts(
 }
 
 /**
- * Related posts for a given post — scored by category + tag overlap.
- * Falls back to recent posts if not enough matches found.
+ * Related posts — scored by countries + category + tag overlap.
  *
  * Scoring:
- *   same category + shared tag → 3
- *   same category only         → 2
- *   shared tag only            → 1
- *
- * Posts sorted by score desc, then date desc within each score tier.
+ *   shared country + shared tag → 4
+ *   same category + shared tag  → 3
+ *   same category only          → 2
+ *   shared tag only             → 1
  */
 export function getRelatedPosts(
   current: CollectionEntry<"posts">,
   allPosts: CollectionEntry<"posts">[],
   count: number
 ): CollectionEntry<"posts">[] {
-  const currentTags     = current.data.tags     ?? [];
-  const currentCategory = current.data.category;
- 
+  const currentTags      = current.data.tags ?? [];
+  const currentCategory  = current.data.category;
+  const currentCountries = getCountryIds(current);
+
   const scored = allPosts
     .filter((post) => post.id !== current.id)
     .map((post) => {
-      const sameCategory = currentCategory && post.data.category === currentCategory;
-      const sharedTag    = (post.data.tags ?? []).some((tag) => currentTags.includes(tag));
- 
+      const sharedCountry =
+        currentCountries.length > 0 &&
+        getCountryIds(post).some((id) => currentCountries.includes(id));
+      const sameCategory =
+        currentCategory && post.data.category === currentCategory;
+      const sharedTag = (post.data.tags ?? []).some((tag) =>
+        currentTags.includes(tag)
+      );
+
       let score = 0;
-      if (sameCategory && sharedTag) score = 3;
-      else if (sameCategory)         score = 2;
-      else if (sharedTag)            score = 1;
- 
+      if (sharedCountry && sharedTag)  score = 4;
+      else if (sameCategory && sharedTag) score = 3;
+      else if (sameCategory)           score = 2;
+      else if (sharedTag)              score = 1;
+
       return { post, score };
     })
     .filter(({ score }) => score > 0)
-    .sort((a, b) =>
-      b.score - a.score ||
-      b.post.data.published.valueOf() - a.post.data.published.valueOf()
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        b.post.data.published.valueOf() - a.post.data.published.valueOf()
     )
     .slice(0, count)
     .map(({ post }) => post);
- 
-  // Fallback to recent posts if not enough scored matches
+
   if (scored.length < count) {
     const recent = allPosts
       .filter(
         (post) =>
-          post.id !== current.id &&
-          !scored.find((r) => r.id === post.id)
+          post.id !== current.id && !scored.find((r) => r.id === post.id)
       )
-      .sort((a, b) => b.data.published.valueOf() - a.data.published.valueOf())
+      .sort(
+        (a, b) => b.data.published.valueOf() - a.data.published.valueOf()
+      )
       .slice(0, count - scored.length);
- 
+
     return [...scored, ...recent];
   }
- 
+
   return scored;
 }
 
 // ── Pure utilities ─────────────────────────────────────────────────────────────
 
-/**
- * Group posts by publication year, descending.
- */
 export function groupByYear(
   posts: CollectionEntry<"posts">[]
 ): Map<number, CollectionEntry<"posts">[]> {
@@ -171,12 +277,6 @@ export function groupByYear(
   return new Map([...groups.entries()].sort((a, b) => b[0] - a[0]));
 }
 
-/**
- * Calculate reading time from markdown content.
- * @param content - Raw markdown string
- * @param wordsPerMinute - Reading speed (default 200). Adjust for non-English content,
- *   e.g. 150 for Marathi or other Indic scripts.
- */
 export interface ReadingTime {
   text: string;
   minutes: number;

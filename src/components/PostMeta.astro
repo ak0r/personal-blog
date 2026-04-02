@@ -1,12 +1,13 @@
 ---
 /**
- * PostMeta — shared date, read time, and tag meta for posts.
+ * PostMeta — date, read time, places, and tags for posts.
  *
  * In list context (PostItem):  date only — "March 2nd", no icons
- * In post context (BlogLayout): date · read time · tags, with icons
+ * In post context (BlogLayout): places · date · read time, then tags on next line
  *
- * When `updated` is provided it replaces `published` in the display
- * with an "Updated" prefix. published is still used for the datetime attribute.
+ * Layout (post context):
+ *   Rajgad, Pune  ·  12 Mar 2024  ·  8 min
+ *   #tag1  #tag2
  */
 import { ordinalSuffix } from "@/utils/string.utils";
 import Icon from "@/components/Icon.astro";
@@ -15,10 +16,11 @@ interface Props {
   published: Date;
   updated?:  Date;
   readTime?: string;
-  tags?: string[];
+  tags?:     string[];
+  places?:   string[];
 }
 
-const { published, updated, readTime, tags } = Astro.props;
+const { published, updated, readTime, tags, places } = Astro.props;
 
 const displayDate = updated ?? published;
 const day   = displayDate.getDate();
@@ -28,38 +30,49 @@ const year  = displayDate.getFullYear();
 const dateShort = `${month} ${ordinalSuffix(day)}`;
 const dateFull  = `${dateShort}, ${year}`;
 
-const showFull = !!readTime || (tags && tags.length > 0);
+const showFull    = !!readTime || (tags && tags.length > 0) || (places && places.length > 0);
+const placesLabel = places?.join(', ') ?? null;
 ---
 
 <div class="post-meta">
-  <time class="post-meta__item" datetime={published.toISOString()}>
-    {showFull && <Icon name="calendar" size={13} />}
-    {updated && showFull && <span class="post-meta__updated-label">Updated</span>}
-    {showFull ? dateFull : dateShort}
-  </time>
 
-  {readTime && (
-    <>
-      <span class="post-meta-sep" aria-hidden="true">·</span>
-      <span class="post-meta__item">
-        <Icon name="clock" size={13} />
-        {readTime}
-      </span>
-    </>
-  )}
+  {/* ── Main meta line: Rajgad, Pune · 12 Mar 2024 · 8 min ─────────── */}
+  <div class="post-meta__line">
 
+    {placesLabel && (
+      <>
+        <span class="post-meta__item post-meta__places">
+          {placesLabel}
+        </span>
+        <span class="post-meta-sep" aria-hidden="true">·</span>
+      </>
+    )}
+
+    <time class="post-meta__item" datetime={published.toISOString()}>
+      {showFull && <Icon name="calendar" size={13} />}
+      {updated && showFull && <span class="post-meta__updated-label">Updated</span>}
+      {showFull ? dateFull : dateShort}
+    </time>
+
+    {readTime && (
+      <>
+        <span class="post-meta-sep" aria-hidden="true">·</span>
+        <span class="post-meta__item">
+          <Icon name="clock" size={13} />
+          {readTime}
+        </span>
+      </>
+    )}
+
+  </div>
+
+  {/* ── Tags line: #tag1  #tag2 ──────────────────────────────────────── */}
   {tags && tags.length > 0 && (
-    <>
-      <span class="post-meta-sep" aria-hidden="true">·</span>
-      <span class="post-meta-tags" aria-label="Tags">
-        {tags.map((tag) => (
-          <a href={`/tags/${tag}`} class="post-tag badge badge--outline">
-            <Icon name="hash" size={11} />
-            {tag}
-          </a>
-        ))}
-      </span>
-    </>
+    <div class="post-meta__tags" aria-label="Tags">
+      {tags.map((tag) => (
+        <span class="post-tag">#{tag}</span>
+      ))}
+    </div>
   )}
 
   <slot />

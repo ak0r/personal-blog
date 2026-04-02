@@ -1,0 +1,25 @@
+---
+/**
+ * /tech/[slug]
+ *
+ * Individual tech post pages.
+ */
+import { render } from 'astro:content';
+import BlogLayout from '@/layouts/BlogLayout.astro';
+import { getTechPosts } from '@/utils/content.utils';
+
+export async function getStaticPaths() {
+  const posts = await getTechPosts();
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props:  { entry: post },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+
+<BlogLayout {entry}>
+  <Content />
+</BlogLayout>
