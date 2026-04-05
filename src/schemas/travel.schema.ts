@@ -13,7 +13,7 @@ export const travelSchema = baseSchema.extend({
   countries: z.array(z.string()).optional(), // e.g. ["India", "Sri Lanka"]
   places:    z.array(z.string()).optional(), // e.g. ["Rajgad", "Pune"]
   region:    z.string().optional(),          // e.g. "Sahyadri"
-  type:      z.enum(['journey', 'experience', 'guide', 'gallery', 'notes', 'hiking']).optional(),
+  type:      z.enum(['story', 'itinerary', 'guide', 'gallery', 'review', 'list']).optional(),
 
   // ── Series ───────────────────────────────────────────────────────────────
   series: z.string().optional(),

@@ -6,7 +6,7 @@
  * Reads and writes URL search params — bookmarkable, shareable.
  *
  * Dimensions:
- *   type        — post type enum (journey, experience, guide, photowalk, notes)
+ *   type        — post type enum ('story', 'itinerary', 'guide', 'gallery', 'review', 'list')
  *   tag         — post tags
  *   destination — destination collection id
  *
@@ -48,11 +48,12 @@ const show = {
 };
 
 const TYPE_LABELS: Record<string, string> = {
-  journey:    'Journey',
-  experience: 'Experience',
-  guide:      'Guide',
-  photowalk:  'Photowalk',
-  notes:      'Notes',
+  story:      'Stories',
+  itinerary:  'Itineraries',
+  guide:      'Guides',
+  gallery:    'Galleries',
+  review:     'Reviews',
+  list:       'Lists',
 };
 ---
 
