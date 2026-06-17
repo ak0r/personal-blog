@@ -9,10 +9,10 @@
  */
 import type { CollectionEntry } from "astro:content";
 import PostItem from "@/components/PostItem.astro";
-import { groupByYear } from "@/utils/content.utils";
+import { type AnyPost, groupByYear } from "@/utils/content.utils";
 
 interface Props {
-  posts: CollectionEntry<"posts">[];
+  posts: AnyPost[];
 }
 
 const { posts } = Astro.props;
