@@ -35,4 +35,4 @@ src/content/posts/*
 src/content/pages/*
 src/content/desinations/*
 
-!src/content/.git
+!src/content/.gittemplate/src/content
