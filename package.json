@@ -6,34 +6,12 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "ASTRO_CONTENT_COLLECTION_CACHE=false astro dev",
-    "build": "astro build && npx pagefind --site dist && cp -r dist/pagefind public/",
-    "preview": "astro preview",
-    "astro": "astro",
-    "sync-attachments": "node scripts/sync-attachments.js",
-    "sync-local": "./scripts/sync-local.sh",
-    "sync-content": "git submodule update --init --remote src/content && echo '✅ Content synced'",
-    "version:patch": "npm version patch",
-    "version:minor": "npm version minor",
-    "push:release": "git push && git push --tags"
-  },
-  "dependencies": {
-    "@astrojs/check": "^0.9.9",
-    "@astrojs/compiler-rs": "^0.2.2",
-    "@astrojs/mdx": "^6.0.3",
-    "@astrojs/rss": "^4.0.18",
-    "@astrojs/sitemap": "^3.7.3",
-    "@pagefind/default-ui": "^1.4.0",
-    "@tailwindcss/vite": "^4.2.1",
-    "@vercel/og": "^0.11.1",
-    "astro": "^6.4.7",
-    "astro-expressive-code": "^0.41.7",
-    "glightbox": "^3.3.1",
-    "mdast": "^0.26.2",
-    "pagefind": "^1.4.0",
-    "tailwindcss": "^4.2.1",
-    "typescript": "^5.9.3",
-    "unified": "^11.0.5",
-    "unist-util-visit": "^5.1.0"
+    "sync-template": "bash scripts/sync-template-local.sh",
+    "sync-content": "bash scripts/sync-content-local.sh",
+    "sync": "pnpm sync-template && pnpm sync-content",
+    "sync-dry": "pnpm sync-template --dry-run && pnpm sync-content --dry-run",
+    "dev": "pnpm sync && cd template && pnpm dev --host",
+    "build": "cd template && pnpm build",
+    "preview": "cd template && pnpm preview"
   }
 }

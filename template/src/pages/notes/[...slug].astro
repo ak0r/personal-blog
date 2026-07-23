@@ -1,0 +1,84 @@
+---
+import { render } from "astro:content";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import ContentHeader from "@/components/ContentHeader.astro";
+import GalleryLightbox from "@/components/GalleryLightbox.astro";
+import StructuredData from "@/components/StructuredData.astro";
+import RelatedContent from "@/components/RelatedContent.astro";
+import { getAllNotes, getAllEntries, getNoteSlugPath } from "@/utils/content";
+import { formatDate, titleify, calculateReadingTime } from "@/utils/text";
+import { absoluteUrl, getOgImagePath } from "@/utils/url";
+import { getConfig } from "@/utils/config";
+import { getRelatedEntries } from "@/utils/related";
+
+export async function getStaticPaths() {
+  const allEntries = await getAllNotes();
+
+  return allEntries.map((entry) => ({
+    params: { slug: getNoteSlugPath(entry.id, entry.filePath) },
+    props: { entry },
+  }));
+}
+const siteConfig = await getConfig();
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const { title, description, category, published, updated } = entry.data;
+const dateLabel = updated? formatDate(updated) : formatDate(published);
+const dtLabel = updated? updated.toISOString() : published.toISOString();
+const readingTimeLabel = calculateReadingTime(entry.body ?? '').text;
+
+const relatedEntries = getRelatedEntries(entry, await getAllEntries());
+
+const entryPath = `/posts/${getNoteSlugPath(entry.id, entry.filePath)}`;
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: title,
+  description: description,
+  datePublished: published.toISOString(),
+  dateModified: (updated ?? published).toISOString(),
+  author: { "@type": "Person", name: siteConfig.author.name },
+  image: absoluteUrl(getOgImagePath(entryPath), Astro.site),
+  url: absoluteUrl(entryPath, Astro.site),
+};
+---
+
+<BaseLayout title={title} description={description} type="article">
+  <StructuredData schema={schema} slot="head" />
+  <div class="page-width">
+    <ContentHeader title={title}>
+      {category && (
+        <Fragment slot="eyebrow">
+          <div class="flex mb-2 gap-3 font-mono text-sm tabular-nums text-muted-foreground">
+            <span>
+              {titleify(category)}
+            </span>
+          </div>
+        </Fragment>
+      )}
+      <Fragment slot="meta">
+        <div class="flex mt-2 gap-3 font-mono text-sm tabular-nums text-muted-foreground"> 
+          <time class=""
+            datetime={dtLabel}
+          >
+            {dateLabel}
+          </time>
+          <span>{readingTimeLabel}</span>
+        </div>
+      </Fragment>
+    </ContentHeader>
+    <article class="py-6">
+      <aside data-pagefind-body>
+        <meta data-pagefind-meta="title[content]" content={title} />
+        <meta data-pagefind-sort="date[content]" content={dtLabel} />
+        <meta data-pagefind-filter="collection[content]" content={entry.collection} />
+        <meta data-pagefind-filter="category[content]" content={category} />
+        <div class="markdown-content">
+          <Content />
+        </div>
+      </aside>
+    </article>
+    <RelatedContent entry={entry} />
+  </div>
+  <GalleryLightbox />
+</BaseLayout>

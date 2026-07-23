@@ -22,7 +22,6 @@ pnpm-debug.log*
 
 # setting folders
 .idea/
-.vscode/
 
 # Pagfind earch index
 public/pagefind/*
@@ -30,9 +29,13 @@ public/pagefind/*
 #Claude
 .claude/
 
-# Local content , copied for testing. Actual content is synced via submodule
-src/content/posts/*
-src/content/pages/*
-src/content/desinations/*
+# Template directories
+template/node_modules
+template/.astro
+template/dist
+template/.vscode
+template/.claude
+node_modules
 
-!src/content/.git
+# content/ is a git submodule — its own .gitignore governs its contents,
+# nothing to list here.

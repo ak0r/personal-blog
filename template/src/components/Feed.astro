@@ -1,0 +1,16 @@
+---
+import type { Post } from "@/types";
+import FeedItem from "@/components/FeedItem.astro";
+
+interface Props {
+  entries: Post[];
+}
+
+const { entries } = Astro.props;
+---
+
+<div>
+  {entries.map((entry) => (
+    <FeedItem {entry} />
+  ))}
+</div>

@@ -1,0 +1,16 @@
+---
+import type { Note } from "@/types";
+import NoteFeedItem from "@/components/NoteFeedItem.astro";
+
+interface Props {
+  entries: Note[];
+}
+
+const { entries } = Astro.props;
+---
+
+<div>
+  {entries.map((entry) => (
+    <NoteFeedItem {entry} />
+  ))}
+</div>

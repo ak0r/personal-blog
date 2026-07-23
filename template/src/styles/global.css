@@ -1,0 +1,64 @@
+@import "tailwindcss";
+@import "./theme.css";
+@import "./typography.css";
+@import "satteri-callouts/theme/obsidian";
+
+@utility page-width {
+  @apply mx-auto w-full max-w-2xl px-4 sm:px-6 lg:px-8;
+}
+
+@utility section {
+  @apply py-6 md:py-8;
+}
+
+@utility divider {
+  @apply border-t border-border;
+}
+
+@utility ease-fluid {
+  transition-timing-function:
+    cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@utility nav-link {
+  @apply text-muted-foreground transition-colors duration-200 hover:text-foreground;
+}
+
+@utility title-link {
+  @apply transition-colors duration-200 hover:text-primary;
+}
+
+@utility content-link {
+  @apply underline underline-offset-2 decoration-1 decoration-muted-foreground/40;
+  @apply transition-colors duration-200;
+  @apply hover:text-foreground hover:decoration-current;
+}
+
+@utility active-nav {
+  @apply underline underline-offset-6 decoration-[1.5px];
+}
+
+@layer components {
+
+  .gallery-grid {
+    @apply grid-cols-2 md:grid-cols-3;
+    @apply grid gap-x-2 gap-y-1 my-6;
+  }
+
+  .callout { @apply rounded-lg; }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

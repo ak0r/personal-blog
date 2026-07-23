@@ -1,0 +1,14 @@
+---
+import { getConfig } from "@/utils/config";
+const siteConfig = await getConfig();
+---
+<footer class="page-width flex items-center justify-between py-8 sm:py-10 flex-wrap">
+  <span class="font-mono text-sm tracking-wide text-muted-foreground">
+    {siteConfig.footerCredits}
+  </span>
+  <nav class="flex gap-4 font-mono text-sm text-muted-foreground">
+    {siteConfig.footerLinks?.map((item) => (
+      <a href={item.url} class="nav-link">{item.title}</a>
+    ))}
+  </nav>
+</footer>

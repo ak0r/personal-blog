@@ -1,0 +1,41 @@
+---
+import BrowseValueList from "./BrowseValueList.astro";
+import Section from "./Section.astro";
+
+import { getBrowseValues } from "@/utils/browse";
+
+import type { CollectionEntry } from "astro:content";
+import type { BrowseDimension } from "@/types";
+
+interface Props {
+  entries: CollectionEntry<any>[];
+  dimensions: BrowseDimension[];
+}
+
+const {
+  entries,
+  dimensions,
+} = Astro.props;
+---
+
+{
+  dimensions.map((dimension) => {
+    const values = getBrowseValues(entries, dimension.key);
+
+    if (!values.length) {
+      return null;
+    }
+
+    return (
+      <Section title={dimension.title}>
+        <BrowseValueList
+          items={values.map((value) => ({
+            label: value.value,
+            meta: value.count,
+            href: `/browse/${dimension.slug}/${value.slug}/`,
+          }))}
+        />
+      </Section>
+    );
+  })
+}

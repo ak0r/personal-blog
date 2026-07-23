@@ -1,0 +1,16 @@
+---
+import { getConfig } from "@/utils/config";
+import { getAssetPath } from "@/utils/url";
+
+const siteConfig = await getConfig();
+---
+<header class="page-width flex items-center justify-between py-8 sm:py-10 flex-wrap">
+    <a href="/" class="font-normal text-xl shrink-0">
+      {siteConfig.title}
+    </a>
+    <nav class="flex items-center gap-5 font-mono text-muted-foreground text-sm">
+      {siteConfig.navigation?.map((item) => (
+        <a href={item.url} class="nav-link">{item.title}</a>
+      ))}
+    </nav>
+</header>

@@ -1,0 +1,46 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import PageHeader from "@/components/PageHeader.astro";
+import BrowseValueList from "@/components/BrowseValueList.astro";
+
+import { getAllEntries } from "@/utils/content";
+import { getBrowseValues, getBrowseDimensions } from "@/utils/browse";
+
+const entries = await getAllEntries();
+
+export async function getStaticPaths() {
+  const dimensions = await getBrowseDimensions();
+
+  return dimensions.map((dimension) => ({
+    params: {
+      slug: dimension.slug,
+    },
+    props: {
+      dimension,
+    },
+  }));
+}
+
+const { dimension } = Astro.props;
+
+const values = getBrowseValues(entries, dimension.key);
+---
+
+<BaseLayout
+  title={dimension.title}
+  description={`Browse by ${dimension.title.toLowerCase()}.`}
+>
+  <div class="page-width">
+    <PageHeader
+      title={dimension.title}
+    />
+
+    <BrowseValueList
+      items={values.map((value) => ({
+        label: value.value,
+        meta: value.count,
+        href: `/browse/${dimension.slug}/${value.slug}/`,
+      }))}
+    />
+  </div>
+</BaseLayout>

@@ -1,0 +1,17 @@
+---
+interface Props {
+  title: string;
+  class?: string;
+}
+
+const { title, class: className } = Astro.props;
+---
+<header class:list={["mt-2 py-3 md:mt-4 md:py-6", className]}>
+  <div class="flex flex-col">
+    <slot name="eyebrow" />
+    <h1 class="font-serif text-2xl font-semibold tracking-tight">
+      {title}
+    </h1>
+    <slot name="meta" />
+  </div> 
+</header>

@@ -1,0 +1,29 @@
+---
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import PageHeader from "@/components/PageHeader.astro";
+import BrowseDimensions from "@/components/BrowseDimensions.astro";
+
+import { getAllEntries } from "@/utils/content";
+import { getBrowseDimensions } from "@/utils/browse";
+
+const entries = await getAllEntries();
+
+const dimensions = await getBrowseDimensions();
+---
+
+<BaseLayout
+    title="Browse"
+    description="Browse content by dimension."
+>
+  <div class="page-width">
+    <PageHeader
+        title="Browse"
+        lede="Explore the content from different perspectives."
+    />
+
+    <BrowseDimensions
+        entries={entries}
+        dimensions={dimensions}
+    />
+  </div>
+</BaseLayout>
