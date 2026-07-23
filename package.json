@@ -11,7 +11,7 @@
     "sync": "pnpm sync-template && pnpm sync-content",
     "sync-dry": "pnpm sync-template --dry-run && pnpm sync-content --dry-run",
     "dev": "pnpm sync && cd template && pnpm dev --host",
-    "build": "cd template && pnpm build",
+    "build": "cd template && pnpm install && pnpm build",
     "preview": "cd template && pnpm preview"
   }
 }
