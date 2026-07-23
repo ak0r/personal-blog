@@ -1,0 +1,97 @@
+---
+import { render } from "astro:content";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import ContentHeader from "@/components/ContentHeader.astro";
+import ImageWrapper from "@/components/ImageWrapper.astro";
+import PostGallery from "@/components/PostGallery.astro";
+import GalleryLightbox from "@/components/GalleryLightbox.astro";
+import StructuredData from "@/components/StructuredData.astro";
+import RelatedContent from "@/components/RelatedContent.astro";
+import { getAllPosts, getPostSlugPath } from "@/utils/content";
+import { getCoverImage, getPostGallery } from "@/utils/image";
+import { formatDate, titleify, calculateReadingTime } from "@/utils/text";
+import { absoluteUrl, getOgImagePath } from "@/utils/url";
+import { getConfig } from "@/utils/config";
+
+export async function getStaticPaths() {
+  const posts = await getAllPosts();
+
+  return posts.map((post) => ({
+    params: { slug: getPostSlugPath(post.id, post.filePath) },
+    props: { post },
+  }));
+}
+const siteConfig = await getConfig();
+const { post } = Astro.props;
+const { Content } = await render(post);
+const { title, description, category, published, updated } = post.data;
+
+const cover = getCoverImage(post.data.cover);
+const galleryImages = getPostGallery(post.filePath ?? '');
+const dateLabel = updated? formatDate(updated) : formatDate(published);
+const dtLabel = updated? updated.toISOString() : published.toISOString();
+const readingTimeLabel = calculateReadingTime(post.body ?? '').text;
+
+const postPath = `/posts/${getPostSlugPath(post.id, post.filePath)}`;
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  headline: title,
+  description: description,
+  datePublished: published.toISOString(),
+  dateModified: (updated ?? published).toISOString(),
+  author: { "@type": "Person", name: siteConfig.author.name },
+  image: absoluteUrl(getOgImagePath(postPath), Astro.site),
+  url: absoluteUrl(postPath, Astro.site),
+};
+---
+
+<BaseLayout title={title} description={description} type="article">
+  <StructuredData schema={schema} slot="head" />
+  <div class="page-width">
+    <ContentHeader title={title}>
+      <Fragment slot="eyebrow">
+        <div class="flex mb-2 gap-3 font-mono text-sm tabular-nums text-muted-foreground"> 
+          <span>
+            {titleify(category)}
+          </span>
+        </div>
+      </Fragment>
+      <Fragment slot="meta">
+        <div class="flex mt-2 gap-3 font-mono text-sm tabular-nums text-muted-foreground"> 
+          <time class=""
+            datetime={dtLabel}
+          >
+            {dateLabel}
+          </time>
+          <span>{readingTimeLabel}</span>
+        </div>
+      </Fragment>
+    </ContentHeader>
+    <article class="py-6">
+      <aside data-pagefind-body>
+        <meta data-pagefind-meta="title[content]" content={title} />
+        <meta data-pagefind-sort="date[content]" content={published.toISOString()} />
+        <meta data-pagefind-filter="collection[content]" content={post.collection} />
+        <meta data-pagefind-filter="category[content]" content={category} />
+        <div class="markdown-content">
+          {cover && (
+            <ImageWrapper
+              src={cover}
+              alt={title}
+              bare
+              class="mt-4 aspect-2/1 w-full object-cover"
+            />
+          )}
+          <Content />
+        </div>
+      </aside>
+      <!-- Galley -->
+      {galleryImages.length > 0 && (
+        <PostGallery images={galleryImages} galleryId={post.id} />
+      )}
+    </article>
+    <RelatedContent entry={post} />
+  </div>
+  <GalleryLightbox />
+</BaseLayout>

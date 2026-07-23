@@ -70,7 +70,7 @@ const isAstroImage = (src: unknown): src is ImageMetadata =>
         decoding="async"
         formats={['avif', 'webp']}
         quality={quality}
-        class={className}
+        class={imageClass}
       />
     ) : (
       <img src={src} alt={alt} loading={loading} class={imageClass} />

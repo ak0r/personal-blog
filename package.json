@@ -6,11 +6,12 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "cd template && pnpm dev",
+    "sync-template": "bash scripts/sync-template-local.sh",
+    "sync-content": "bash scripts/sync-content-local.sh",
+    "sync": "pnpm sync-template && pnpm sync-content",
+    "sync-dry": "pnpm sync-template --dry-run && pnpm sync-content --dry-run",
+    "dev": "pnpm sync && cd template && pnpm dev --host",
     "build": "cd template && pnpm build",
-    "sync": "bash sync-content.sh",
-    "sync:dry": "bash sync-content.sh --dry-run",
-    "sync:lipi": "git fetch lipi && git log lipi/main --oneline -20",
-    "sync:lipi:diff": "git diff lipi/main -- template/"
+    "preview": "cd template && pnpm preview"
   }
 }

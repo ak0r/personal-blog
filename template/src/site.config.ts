@@ -1,73 +1,37 @@
-import userConfig from "../configs/user.config";
+import type { UserConfig } from '@/types'
 
-export interface NavItem {
-  title: string;
-  url: string;
+export const defaultConfig: UserConfig = {
+  title:       'Patrika',
+  description: 'A field notebook, kept in the open',
+  url:         'https://example.com',
+  locale:      'en',
+
+  author: {
+    name: 'Your Name',
+  },
+
+  navigation: [
+    { title: 'Essays',  url: '/posts' },
+    { title: 'Notes',   url: '/notes' },
+    { title: 'Archive', url: '/archive' },
+    { title: 'About',   url: '/about' },
+  ],
+
+  footerLinks: [
+    { title: 'Now',      url: '/now' },
+    { title: 'Colophon', url: '/colophon' },
+    { title: 'RSS',      url: '/rss.xml' },
+  ],
+
+  social: [],
+
+  tagline:      'attention · craft · slowness',
+  postsPerPage: 10,
+  recentPosts:  5,
+  showLogo:     false,
+
+  // Generic, no assumed keys — real indexes are configured per-site (see config.yaml).
+  browse: {
+    dimensions: [],
+  },
 }
-
-export interface SocialItem {
-  title: string;
-  url: string;
-  icon?: string;
-}
-
-export interface UserConfig {
-  title: string;
-  description: string;
-  url: string;
-  author: string;
-
-  avatar?: string;
-  logo?: string;
-  defaultOGImage?: string;
-
-  navigation?: NavItem[];
-  footerLinks?: NavItem[];
-  social?: SocialItem[];
-
-  footerCredits?: string;
-
-  postsPerPage?: number;
-  recentPosts?: number;
-  relatedPosts?: number;
-
-  showLogo?: boolean;
-  showThemeToggle?: boolean;
-  showReadingTime?: boolean;
-
-  heroVariant?: "default" | "studio";
-
-  annotation?: string;
-
-};
-
-const siteConfig = {
-  title: userConfig.title,
-  description: userConfig.description,
-  url: userConfig.url,
-  author: userConfig.author,
-
-  avatar: userConfig.avatar,
-  logo: userConfig.logo,
-  ogImage: userConfig.defaultOGImage ?? "/og.jpg",
-
-  navigation: userConfig.navigation ?? [],
-  footerLinks: userConfig.footerLinks ?? [],
-  social: userConfig.social ?? [],
-
-  footerCredits: userConfig.footerCredits,
-
-  postsPerPage: userConfig.postsPerPage ?? 8,
-  recentPosts: userConfig.recentPosts ?? 6,
-  relatedPosts: userConfig.relatedPosts ?? 4,
-
-  showLogo: userConfig.showLogo ?? false,
-  showThemeToggle: userConfig.showThemeToggle ?? true,
-  showReadingTime: userConfig.showReadingTime ?? true,
-
-  heroVariant: userConfig.heroVariant ?? "default",
-
-  annotation: userConfig.annotation,
-};
-
-export default siteConfig;

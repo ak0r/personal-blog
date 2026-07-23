@@ -1,0 +1,46 @@
+---
+interface Props {
+  title?: string;
+  meta?: string;
+  href?: string;
+  action?: string;
+  level?: "h2" | "h3" | "h4";
+  class?: string;
+}
+
+const {
+  title,
+  meta,
+  href,
+  action = "View all",
+  level = "h2",
+  class: className,
+} = Astro.props;
+
+const Heading = level;
+---
+
+<section class:list={["section", className]}>
+  {title && (
+    <header class="mb-4 flex items-center gap-3 md:mb-6">
+      <Heading class="text-base font-medium p-0 m-0">
+        {title}
+      </Heading>
+
+      {href ? (
+        <a href={href}
+          class="nav-link inline-flex items-center gap-1 font-mono text-sm text-muted-foreground"
+        >
+          {action}
+          <span aria-hidden="true">›</span>
+        </a>
+      ) : meta ? (
+        <span class="font-mono text-sm text-muted-foreground">
+          {meta}
+        </span>
+      ) : null}
+    </header>
+  )}
+
+  <slot />
+</section>

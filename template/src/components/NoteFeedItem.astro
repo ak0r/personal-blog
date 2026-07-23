@@ -1,0 +1,27 @@
+---
+import type { Note } from "@/types";
+import { getNoteUrl } from "@/utils/content";
+import { formatDate } from "@/utils/text";
+
+interface Props {
+  entry: Note;
+}
+
+const { entry } = Astro.props;
+const { title, published, updated } = entry.data;
+const date = updated? formatDate(updated) : formatDate(published);
+const href = getNoteUrl(entry.id, entry.filePath);
+---
+<article class="group grid gap-3 py-2 md:grid-cols-[9rem_1fr] md:gap-6">
+  <time class="font-mono text-sm tabular-nums text-muted-foreground"
+    datetime={entry.data.published.toISOString()}
+  >
+    {date}
+  </time>
+  
+  <h3 class="font-serif text-xl leading-tight">
+    <a href={href} class="title-link">
+      {title}
+    </a>
+  </h3>
+</article>

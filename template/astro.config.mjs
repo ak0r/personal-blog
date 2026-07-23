@@ -1,162 +1,81 @@
 // @ts-check
-import { defineConfig, fontProviders, svgoOptimizer } from 'astro/config';
+import { defineConfig, fontProviders } from 'astro/config';
+import { satteri } from '@astrojs/markdown-satteri';
 import tailwindcss from '@tailwindcss/vite';
 import mdx from '@astrojs/mdx';
-import sitemap from '@astrojs/sitemap';
-import siteConfig from './src/site.config';
-import rehypeUnwrapImages from 'rehype-unwrap-images';
-import rehypeSlug from "rehype-slug";
-import rehypeAutolinkHeadings from "rehype-autolink-headings";
-import { rawFonts } from "./src/plugins/rawFonts";
-import { unified } from '@astrojs/markdown-remark';
-import remarkCallouts from './src/plugins/remark-callouts';
-import { remarkImageProcessing } from './src/plugins/remark-image-processing';
-import { remarkExternalLinks } from './src/plugins/remark-external-links.ts';
-import { remarkObsidian } from './src/plugins/remark-obsidian.ts';
+import sitemap from "@astrojs/sitemap";
 
+import { wikilinkResolver, directiveToHtml, obsidianTextFormatting } from './src/plugins/satteri.ts';
+import { resolveVaultImagePaths, imageAttributes, galleryGrouping } from './src/plugins/satteri-gallery.ts';
+
+import satteriCallouts from 'satteri-callouts';
 
 // https://astro.build/config
 export default defineConfig({
-  site: siteConfig.url,
+  site: 'https://your-site.example', // ← replace with your domain (also update config.yaml)
 
-  image: {
-    responsiveStyles: true,
+  vite: {
+    plugins: [tailwindcss()],
+    build: {
+      cssCodeSplit: true,
+      minify: 'esbuild',
+    },
   },
+
+  integrations: [mdx(), sitemap()],
 
   experimental: {
     contentIntellisense: true,
-    rustCompiler: true,
-    queuedRendering: {
-      enabled: true,
-    },
-    svgOptimizer: svgoOptimizer(),
   },
-
-  security: {
-    contentSecurityPolicy: {
-      directives: {
-        "script-src": ["'self'", "https://static.cloudflareinsights.com"],
-        "style-src":  ["'self'", "'unsafe-inline'"],
-        "connect-src":["'self'", "https://cloudflareinsights.com"],
-        "worker-src": ["'self'", "blob:"],
-      },
-    },
-  },
-
+  
   fonts: [
     {
-      name: "Manrope",
-      cssVariable: "--font-lipi-sans",
+      name: "Inter",
+      cssVariable: "--font-sans",
       provider: fontProviders.fontsource(),
       weights: [300, 400, 500, 600, 700],
       fallbacks: ["sans-serif"],
       formats: ["woff", "ttf"],
     },
     {
-      name: "Literata",
-      cssVariable: "--font-lipi-serif",
+      name: "DM Mono",
+      cssVariable: "--font-mono",
       provider: fontProviders.fontsource(),
-      weights: [300, 400, 500, 600, 700],
-      fallbacks: ["serif"],
-      formats: ["woff", "ttf"],
-    },
-    {
-      name: "Fira Code",
-      cssVariable: "--font-lipi-mono",
-      provider: fontProviders.fontsource(),
-      weights: [ 400, 500, 600, 700],
+      weights: [400, 500, 600, 700],
       fallbacks: ["monospace"],
-      formats: ["woff", "ttf"],
-    },
-    {
-      name: "Caveat",
-      cssVariable: "--font-lipi-hand",
-      provider: fontProviders.fontsource(),
-      weights: [ 400, 500, 600, 700],
-      fallbacks: ["serif"],
       formats: ["woff", "ttf"],
     }
   ],
-  
-  vite: {
-    // server: {
-    //   watch: {
-    //     ignored: ['**/.obsidian/**', '**/_bases/**', '**/bases/**', '**/_home/**', '**/home/**', '**/_base/**', '**/base/**']
-    //   }
-    // },
-    // assetsInclude: ['**/*.base', '**/.obsidian/**', '**/_bases/**'],
-    build: {
-      // Per-page CSS splitting. Caches better than one giant bundle for
-      // return visitors who navigate between pages.
-      cssCodeSplit: true,
-      // cssMinify: 'lightningcss',
-      minify: 'esbuild',
-    },
-    css: {
-      transformer: 'lightningcss',
-      lightningcss: {
-        // Modern targets — drops legacy prefixes.
-        targets: {
-          chrome: 110 << 16,
-          firefox: 115 << 16,
-          safari: 16 << 16,
-        },
-      },
-    },
-    optimizeDeps: {
-			exclude: ["@resvg/resvg-js"],
-		},
-    plugins: [
-      tailwindcss(),
-      rawFonts([".ttf",".otf",]),
-    ]
-  },
-
-  integrations: [
-    mdx(), 
-    sitemap()
-  ],
-
-  build: {
-    // Inline small stylesheets into the HTML (~4KB threshold), keep larger
-    // ones as separate files so they're cacheable across pages.
-    inlineStylesheets: 'auto',
-    assets: '_astro',
-  },
 
   markdown: {
-    processor: unified({
-      gfm: true,
-      smartypants: true,
-      remarkPlugins: [
-        // remarkObsidianCore,
-        // remarkGfm,
-        remarkObsidian,
-        remarkExternalLinks,
-        remarkImageProcessing,
-        remarkCallouts,
+    processor: satteri({
+      mdastPlugins: [
+        directiveToHtml,
+        obsidianTextFormatting,
+        resolveVaultImagePaths,
       ],
-      rehypePlugins: [
-        rehypeSlug,
-        rehypeUnwrapImages,
-        [
-          rehypeAutolinkHeadings,
-          {
-            behavior: "append",
-            properties: {
-              className: [
-                "heading-anchor",
-              ],
-              ariaLabel:
-                "Copy heading link",
-            },
-            content: {
-              type: "text",
-              value: "↗",
-            },
-          },
-        ],
+      hastPlugins: [
+        wikilinkResolver,
+        imageAttributes,
+        galleryGrouping,
+        satteriCallouts({
+          theme: "obsidian",
+        }),
       ],
-    }),
-  },
+      features: {
+        wikilinks: true,
+        directive: true,
+        smartPunctuation: { quotes: true, dashes: true, ellipses: true },
+        gfm: {
+          footnotes: {
+            label: "Footnotes",
+            backContent: "↑",
+            backLabel: "Back to reference {reference}",
+          }
+        },
+        subscript: true,
+        superscript: true,
+      }
+    })
+  }
 });

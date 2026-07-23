@@ -167,7 +167,7 @@ export function getCoverImage(
  * Get gallery images for a post, sorted by filename.
  * Reads from src/content/travels/{postDir}/gallery/
  */
-export function getGalleryImages(filePath: string): GalleryImage[] {
+export function getPostGallery(filePath: string): GalleryImage[] {
   const postDir = extractPostDir(filePath);
   if (!postDir) return [];
 
@@ -188,5 +188,5 @@ export function getGalleryImages(filePath: string): GalleryImage[] {
  * Check if a post has a gallery — use for conditional rendering decisions.
  */
 export function hasGallery(filePath: string): boolean {
-  return getGalleryImages(filePath).length > 0;
+  return getPostGallery(filePath).length > 0;
 }

@@ -1,55 +1,30 @@
 ---
-import { getCollection, render } from "astro:content";
-import PageLayout from "@/layouts/PageLayout.astro";
-import {
-  getAllPages,
-  getPageSlug,
-  type Page,
-} from "@/utils/content";
+import { render } from "astro:content";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import PageHeader from "@/components/PageHeader.astro";
+import { getAllPages, getPageSlugPath } from "@/utils/content";
 
-export const getStaticPaths = async () => {
-  const RESERVED = new Set([ "archive", "search", "about", "home-intro" ]);
-
-  const allPages = await getCollection(
-    "pages",
-    ({ id, data }) =>
-      !data.draft &&
-      !RESERVED.has(id)
-  );
-
+export async function getStaticPaths() {
   const pages = await getAllPages();
 
-  return allPages.map((page) => ({
-    params: {
-      slug: getPageSlug(
-        page.id,
-        page.filePath
-      ),
-    },
-    props: {
-      page,
-    },
+  return pages.map((page) => ({
+    params: { slug: getPageSlugPath(page.id, page.filePath) },
+    props: { page },
   }));
-};
-
-type Props = {
-  page: Page;
-};
+}
 
 const { page } = Astro.props;
 const { Content } = await render(page);
-
-const formattedDate = page.data.updated?.toLocaleDateString("en-US", {
-  year: "numeric",
-  month: "long",
-});
-
 ---
 
-<PageLayout entry={page} showHeader>
-  <div class="app-prose page-content data-pagefind-body">
-    <meta data-pagefind-filter="collection[content]" content="page" />
-    <meta data-pagefind-sort="date[content]" content={formattedDate} />
-    <Content />
+<BaseLayout title={page.data.title}>
+  <div class="page-width">
+    <PageHeader title={page.data.title} lede={page.data.description} />
+
+    <article data-pagefind-body class="markdown-content py-6">
+      <meta data-pagefind-meta="title[content]" content={page.data.title} />
+      <meta data-pagefind-sort="date[content]" content={page.data.updated?.toISOString()} />
+      <Content />
+    </article>
   </div>
-</PageLayout>
+</BaseLayout>

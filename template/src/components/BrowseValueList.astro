@@ -1,0 +1,30 @@
+---
+interface Item {
+  label: string;
+  href:  string;
+  meta?: string | number;
+}
+
+interface Props {
+  items: Item[];
+}
+
+const { items } = Astro.props;
+---
+
+{items.length > 0 && (
+  <ul class="space-y-2">
+    {items.map((item) => (
+      <li class="flex gap-4 items-center">
+        <a href={item.href} class="font-serif text-lg title-link">
+          {item.label}
+        </a>
+        {item.meta && (
+          <span class="font-mono text-sm text-muted-foreground">
+            {item.meta}
+          </span>
+        )}
+      </li>
+    ))}
+  </ul>
+) }

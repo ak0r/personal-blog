@@ -4,8 +4,7 @@
   "exclude": ["dist"],
   "compilerOptions": {
     "paths": {
-      "@/*": ["./src/*"]
-    },
-    "types": ["astro/client"]
-  },
+      "@/*": ["./src/*"],
+    }
+  }
 }

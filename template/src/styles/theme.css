@@ -1,5 +1,11 @@
-/* Base Tokens - only change these */
 :root {
+
+  /* ─────────────────────────────────────────────────────────────
+   * Primitive palette
+   * Never reference these directly from components.
+   * Always go through semantic tokens.
+   * ──────────────────────────────────────────────────────────── */
+
   --base-50:  #F5F4ED;
   --base-100: #ECEAE2;
   --base-200: #DDDAD1;
@@ -11,63 +17,120 @@
   --base-800: #3F3D39;
   --base-900: #252523;
   --base-950: #141413;
-  --brand:    #E85D2A;
+
+  /* ─────────────────────────────────────────────────────────────
+   * Accent palette
+   * ──────────────────────────────────────────────────────────── */
+
+  --clay:    #d97757;
+  --oat:     #e3dacc;
+  --olive:   #788c5d;
+  --cactus:  #bcd1ca;
+  --sky:     #6a9bcc;
+  --heather: #cbcadb;
+  --fig:     #c46686;
+  --coral:   #ebcece;
+
+  /* ─────────────────────────────────────────────────────────────
+   * Semantic tokens (shadcn compatible)
+   * ──────────────────────────────────────────────────────────── */
+
+  --background:            var(--base-50);
+  --foreground:            var(--base-950);
+
+  --card:                  var(--base-100);
+  --card-foreground:       var(--base-700);
+
+  --muted:                 var(--base-200);
+  --muted-foreground:      var(--base-500);
+
+  --accent:                var(--base-300);
+  --accent-foreground:     var(--base-900);
+
+  --border:                var(--base-300);
+
+  --primary:               var(--olive);
+  --primary-foreground:    var(--base-50);
+
+  /* ─────────────────────────────────────────────────────────────
+   * Theme tokens
+   * ──────────────────────────────────────────────────────────── */
+
+  /* subtle tinted surface */
+  --primary-muted: color-mix(in oklch, var(--primary) 15%, transparent);
+
+  /* image presentation */
+  --photo-background: var(--base-100);
+  --photo-border: color-mix(in oklch, var(--base-300) 45%, transparent);
+  --thumbnail-background: var(--base-100);
+  --thumbnail-border: color-mix(in oklch, var(--base-300) 40%, transparent);
+
+  /* activity/calendar */
+  --activity-empty: color-mix(in oklch, var(--base-300) 45%, transparent);
+  --activity-active: var(--primary);
+
+  /* layout */
+  --layout-width: 1280px;
+
+  /* image presentation */
+  --thumbnail-ratio: 4 / 5;
+
+  --callout-note-color-light: var(--sky); 
+  --callout-tip-color-light: var(--cactus); 
+  --callout-warning-color-light: var(--clay); 
+  --callout-danger-color-light: var(--fig); 
+  --callout-success-color-light: var(--olive);
 }
 
-/* Light theme values */
-:root {
-  color-scheme: light;
-
-  --background          : var(--base-50);
-  --foreground          : var(--base-900);
-  --card                : var(--base-100);
-  --card-foreground     : var(--base-700);
-  --muted               : var(--base-200);
-  --muted-foreground    : var(--base-500);
-  --border              : var(--base-300);
-  --accent              : var(--base-200);
-  --accent-foreground   : var(--base-900);
-  --ring                : var(--brand);
-  --primary             : var(--brand);
-  --primary-foreground  : #FFFFFF;
-}
-
-/* Dark theme values */
-[data-theme="dark"] {
-  color-scheme: dark;
-
-  --background          : var(--base-950);
-  --foreground          : var(--base-100);
-  --card                : var(--base-900);
-  --card-foreground     : var(--base-200);
-  --muted               : var(--base-800);
-  --muted-foreground    : var(--base-500);
-  --border              : var(--base-700);
-  --accent              : var(--base-800);
-  --accent-foreground   : var(--base-100);
-  --ring                : var(--brand);
-  --primary             : var(--brand);
-  --primary-foreground  : #FFFFFF;
-}
-
+/* ───────────────────────────────────────────────────────────────
+ * Tailwind theme mapping
+ * ───────────────────────────────────────────────────────────── */
 
 @theme inline {
 
-  --color-background          : var(--background);
-  --color-foreground          : var(--foreground);
-  --color-card                : var(--card);
-  --color-card-foreground     : var(--card-foreground);
-  --color-muted               : var(--muted);
-  --color-muted-foreground    : var(--muted-foreground);
-  --color-border              : var(--border);
-  --color-accent              : var(--accent);
-  --color-accent-foreground   : var(--accent-foreground);
-  --color-ring                : var(--ring);
-  --color-primary             : var(--primary);
-  --color-primary-foreground  : var(--primary-foreground);
-  
-  --font-content              : var(--font-lipi-serif);
-  --font-ui                   : var(--font-lipi-sans);
-  --font-code                 : var(--font-lipi-mono);
-  --font-annotation           : var(--font-lipi-hand);
+  /* Typography */
+
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --font-mono: var(--font-mono);
+
+  /* Semantic */
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  --color-border: var(--border);
+
+  /* Theme */
+
+  --color-primary-muted: var(--primary-muted);
+  --color-photo-background: var(--photo-background);
+  --color-photo-border: var(--photo-border);
+  --color-thumbnail-background: var(--thumbnail-background);
+  --color-thumbnail-border: var(--thumbnail-border);
+  --color-activity-empty: var(--activity-empty);
+  --color-activity-active: var(--activity-active);
+
+  /* Accent palette */
+
+  --color-clay: var(--clay);
+  --color-oat: var(--oat);
+  --color-olive: var(--olive);
+  --color-cactus: var(--cactus);
+  --color-sky: var(--sky);
+  --color-heather: var(--heather);
+  --color-fig: var(--fig);
+  --color-coral: var(--coral);
 }

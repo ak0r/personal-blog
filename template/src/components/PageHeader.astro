@@ -1,29 +1,30 @@
 ---
-import { slugify } from '@/utils/text';
-
 interface Props {
-  title?: string;
-  subheading?: string;
-  transitionName?: string;
+  title: string;
+  meta?: string;
+  lede?: string;
+  class?: string;
 }
-const { title, subheading, transitionName } = Astro.props;
+
+const { title, meta, lede, class: className } = Astro.props;
 ---
-<section class="flex flex-col mb-2">
-  {title && (
-    <h1 
-      class="font-content text-3xl leading-tight font-medium md:text-4xl"
-      transition:name={transitionName}
-    > 
-      {title} 
+<header class:list={["mt-2 py-3 md:mt-4 md:py-6", className]}>
+  <div class="grid gap-2 md:grid-cols-[9rem_1fr] md:gap-6 first:items-start items-start">
+    <h1 class="font-serif text-2xl font-semibold tracking-tight">
+      {title}
     </h1>
-  )}
-  {subheading && (
-    <p class="mt-2 max-w-xl text-base leading-relaxed italic text-muted-foreground">
-      {subheading}
+
+    {lede && (
+      <p class="max-w-md leading-relaxed">
+        {lede}
+      </p>
+    )}
+  </div>
+  
+  <slot name="meta" />
+  {meta && (
+    <p class="mt-2 font-mono text-sm text-muted-foreground">
+      {meta}
     </p>
   )}
-  <div class="mt-2 font-code text-muted-foreground text-[10px]">
-    <slot name="meta" />
-  </div>
-  <div class="divider mb-8" />
-</section>
+</header>

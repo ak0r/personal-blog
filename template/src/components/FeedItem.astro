@@ -1,0 +1,36 @@
+---
+import type { Post } from "@/types";
+import { getPostUrl } from "@/utils/content";
+import { formatDate } from "@/utils/text";
+
+interface Props {
+  entry: Post;
+}
+
+const { entry } = Astro.props;
+const { title, description, published, updated } = entry.data;
+const href = getPostUrl(entry.id, entry.filePath);
+const dateLabel = updated? formatDate(updated) : formatDate(published);
+const dtLabel = updated? updated.toISOString() : published.toISOString();
+---
+<article class="group grid gap-3 py-4 md:py-5 md:grid-cols-[9rem_1fr] md:gap-6">
+  <time class="font-mono text-sm tabular-nums text-muted-foreground"
+    datetime={dtLabel}
+  >
+    {dateLabel}
+  </time>
+
+  <div class="space-y-2">
+    <h3 class="font-serif text-xl leading-tight">
+      <a href={href} class="title-link">
+        {title}
+      </a>
+    </h3>
+
+    {description && (
+      <p class="text-sm text-muted-foreground">
+        {description}
+      </p>
+    )}
+  </div>
+</article>

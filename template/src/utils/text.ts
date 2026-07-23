@@ -1,3 +1,37 @@
+export function getSeason(date: Date): 'Spring' | 'Summer' | 'Monsoon' | 'Winter' {
+  const m = date.getMonth() + 1;
+  if (m === 3 || m === 4) return 'Spring';
+  if (m === 5 || m === 6) return 'Summer';
+  if (m >= 7 && m <= 9)  return 'Monsoon';
+  return 'Winter';
+}
+
+export function readingTime(body: string): number {
+  const words = body.trim().split(/\s+/).length;
+  return Math.ceil(words / 200);
+}
+
+export function formatSeriesTitle(slug: string): string {
+  return slug
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase());
+}
+
+export function formatDate(date: Date): string {
+  return date.toLocaleDateString('en-IN', {
+    day:   '2-digit',
+    month: 'short',
+    year:  'numeric',
+  })
+}
+
+export function formatMonthYear(date: Date): string {
+  return date.toLocaleDateString('en-IN', {
+    month: 'short',
+    year:  'numeric',
+  })
+}
+
 /**
  * Convert a string into a URL-safe slug.
  *

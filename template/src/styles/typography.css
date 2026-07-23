@@ -1,242 +1,204 @@
-@plugin "@tailwindcss/typography";
+@layer components {
 
-@layer base {
-  /* =========================================
-     Editorial Typography
-     ========================================= */
-
-  .app-prose {
-    @apply prose max-w-none text-base;
+  .markdown-content {
+    @apply leading-8 text-foreground;
   }
 
-  .app-prose :where(p) {
+  /* Vertical rhythm */
+
+  .markdown-content > * + * {
     @apply mt-6;
   }
 
-  /* =========================================
-     Headings
-     ========================================= */
+  /* Headings */
 
-  .app-prose :where(h1, h2, h3, h4, h5, h6) {
-    @apply text-foreground scroll-mt-24 tracking-tight font-light;
-    margin-top: 1em;
+  .markdown-content h2 {
+    @apply mt-12 mb-4 font-serif text-xl font-semibold tracking-tight;
   }
 
-  .app-prose :where(h1) {
-    @apply text-3xl leading-tight font-medium;
+  .markdown-content h3 {
+    @apply mt-10 mb-3 font-serif text-lg font-semibold tracking-tight;
   }
 
-  .app-prose :where(h2) {
-    @apply text-2xl leading-tight font-normal;
+  .markdown-content h4 {
+    @apply mt-8 mb-2 text-base font-semibold;
   }
 
-  .app-prose :where(h3) {
-    @apply text-xl leading-snug;
+  .markdown-content h5,
+  .markdown-content h6 {
+    @apply mt-6 mb-2 text-base font-normal;
   }
 
-  .app-prose :where(h4) {
-    @apply text-lg;
+  /* Paragraphs */
+
+  .markdown-content p {
+    @apply text-base leading-8;
   }
 
-  /* =========================================
-     Body Content
-     ========================================= */
+  /* Links */
 
-  .app-prose :where(p, ul, ol, table) {
-    @apply text-foreground leading-relaxed;
+  .markdown-content a {
+    @apply content-link text-primary;
   }
 
-  .app-prose :where(strong) {
-    @apply text-foreground font-semibold;
+  /* Lists */
+
+  .markdown-content ul {
+    @apply my-6 list-disc space-y-2 pl-6;
   }
 
-  .app-prose :where(em) {
-    @apply text-foreground/90;
+  .markdown-content ol {
+    @apply my-6 list-decimal space-y-2 pl-6;
   }
 
-  /* =========================================
-     Links
-     ========================================= */
-
-  .app-prose :where(a) {
-    @apply text-foreground decoration-border underline underline-offset-4 transition-colors hover:text-primary hover:decoration-accent;
+  .markdown-content li > ul,
+  .markdown-content li > ol {
+    @apply mt-2 mb-0;
   }
 
-  /* =========================================
-     Lists
-     ========================================= */
+  /* Blockquote */
 
-  .app-prose :where(ul, ol) {
-    @apply ps-5;
+  .markdown-content blockquote {
+    @apply my-8 border-l-2 border-border pl-6 italic text-muted-foreground;
   }
 
-  .app-prose :where(li)::marker {
-    @apply text-muted-foreground;
+  .markdown-content blockquote > *:first-child {
+    @apply mt-0;
   }
 
-  /* =========================================
-     Horizontal Rule
-     ========================================= */
-
-  .app-prose :where(hr) {
-    @apply h-px border-0 m-12;
-    background: linear-gradient(90deg,transparent,var(--color-accent) 20%,var(--color-accent) 80%,transparent);
+  .markdown-content blockquote > *:last-child {
+    @apply mb-0;
   }
 
-  /* =========================================
-     Images
-     ========================================= */
+  /* Horizontal rule */
 
-  .app-prose :where(img) {
-    @apply rounded-sm;    
-    margin-block: 0;
+  .markdown-content hr {
+    @apply my-12 border-border;
   }
 
-  html[data-theme="dark"] .app-prose :where(img) {
-    outline-color: rgba(255, 255, 255, 0.1);
+  /* Inline code */
+
+  .markdown-content :not(pre) > code {
+    @apply rounded bg-muted px-1.5 py-0.5 font-mono text-[0.9em];
   }
 
-  .app-prose :where(figcaption) {
-    @apply text-muted-foreground mt-3 text-center text-sm;
+  /* Code blocks */
+
+  .markdown-content pre {
+    @apply my-8 overflow-x-auto rounded-lg bg-muted p-5;
   }
 
-  /* =========================================
-     Inline Code
-     ========================================= */
-
-  .app-prose :where(code):not(pre code) {
-    @apply bg-accent border border-border font-code text-accent-foreground rounded p-0.5 text-xs before:content-none after:content-none;
+  .markdown-content pre code {
+    @apply bg-transparent p-0 text-sm leading-7 text-muted-foreground;
   }
 
-  /* =========================================
-     Code Blocks
-     ========================================= */
+  /* Images */
 
-  .app-prose :where(pre) {
-    @apply overflow-x-auto;
-    font-size: 0.750rem;
+  .markdown-content img {
+    @apply my-1 h-auto w-full rounded-lg cursor-zoom-in aspect-3/2;
   }
 
-  .app-prose :where(pre):focus-visible {
-    @apply outline-accent outline-2 outline-dashed;
+  /* Figure */
+
+  .markdown-content figure {
+    @apply my-2;
   }
 
-  .astro-code {
-    @apply font-code flex bg-accent text-(--shiki-light) [&_span]:text-(--shiki-light);
+  .markdown-content figure img {
+    @apply my-0;
   }
 
-  html[data-theme="dark"] .astro-code {
-    @apply bg-accent text-(--shiki-dark) [&_span]:text-(--shiki-dark);
+  .markdown-content figcaption {
+    @apply mt-2 text-center text-sm text-muted-foreground;
   }
 
-  .astro-code code {
-    @apply flex-[1_0_100%] bg-transparent p-0 text-inherit;
+  /* Tables */
+
+  .markdown-content table {
+    @apply my-8 w-full border-collapse text-sm;
   }
 
-  /* =========================================
-     Shiki Transformers
-     ========================================= */
-
-  .astro-code .line.highlighted {
-    @apply inline-block w-full bg-white/5;
+  .markdown-content thead {
+    @apply border-b border-border;
   }
 
-  .astro-code .line.diff.add {
-    @apply relative inline-block w-full bg-green-500/10 before:absolute before:-left-3 before:text-green-500 before:content-['+'];
+  .markdown-content th {
+    @apply px-3 py-2 text-left font-semibold;
   }
 
-  .astro-code .line.diff.remove {
-    @apply relative inline-block w-full bg-red-500/10 before:absolute before:-left-3 before:text-red-500 before:content-['-'];
+  .markdown-content td {
+    @apply border-b border-border px-3 py-2;
   }
 
-  .astro-code .highlighted-word {
-    @apply border-border rounded border px-1;
+  /* Definition list */
+
+  .markdown-content dt {
+    @apply mt-6 font-semibold;
   }
 
-  /* =========================================
-     Blockquotes
-     ========================================= */
-
-  .app-prose :where(blockquote) {
-    @apply border-primary border-s-2 ps-5 my-6;
-    quotes: "\201C" "\201D" "\2018" "\2019";
-  }
-  
-  .app-prose :where(blockquote) p {
-    @apply text-base leading-relaxed text-muted-foreground;
+  .markdown-content dd {
+    @apply ml-4 mt-2;
   }
 
-  /* Attribution / cite inside blockquote */
-  .app-prose :where(blockquote cite),
-  .app-prose :where(blockquote p:last-child:not(:first-child)) {
-    @apply not-italic text-xs text-muted-foreground mt-2 block;
-  }
-  
-  .app-prose :where(blockquote cite)::before {
-    content: "— ";
-  }
-  
-  
-  /* ── Pullquote ────────────────────────────────────────────────
-    A highlighted passage — larger, centred register,
-    top and bottom rules only, no left rule.
-    Applied via: <blockquote class="pullquote">
-  ──────────────────────────────────────────────────────────── */
-  .app-prose :where(blockquote.pullquote) {
-    @apply border-s-0 ps-0 my-10 mx-0 not-italic text-center text-muted-foreground;
-    @apply border-t border-b border-border py-6;
-  }
-  
-  .app-prose :where(blockquote.pullquote) p {
-    @apply text-xl md:text-2xl font-medium leading-snug tracking-[-0.01em] text-foreground;
-  }
-  
-  /* Attribution inside pullquote */
-  .app-prose :where(blockquote.pullquote cite) {
-    @apply text-xs text-muted-foreground italic mt-3 block not-italic;
-  }
-  
-  .app-prose :where(blockquote.pullquote cite)::before {
-    content: "— ";
-  }
+  /* Footnotes */
 
-  /* =========================================
-     Tables
-     ========================================= */
+  .markdown-content .footnotes {
+    @apply mt-12 border-t border-border pt-2 text-sm text-muted-foreground;
+    
+    & h2 {
+      @apply text-base font-medium;
+    }
 
-  .app-prose :where(table) {
-    @apply border-border w-full table-auto border-collapse border text-sm;
-  }
+    & ol {
+      @apply mt-4;
+    }
 
-  .app-prose :where(th, td) {
-    @apply border-border border px-3 py-2;
-  }
-
-  .app-prose :where(th) {
-    @apply bg-muted/50 text-foreground text-left font-medium;
-  }
-
-  /* =========================================
-     Details / Summary
-     ========================================= */
-
-  .app-prose :where(details) {
-    @apply border-border rounded-xl border p-4;
-  }
-
-  .app-prose :where(summary) {
-    @apply cursor-pointer font-medium;
-  }
-
-  .app-prose :where(summary):focus-visible {
-    @apply outline-accent outline-2 outline-dashed outline-offset-4;
-  }
-
-  @media (min-width: 768px) {
-    .post-content > p:first-of-type::first-letter {
-      @apply text-primary font-content font-semibold;
-      initial-letter: 3;
-      margin-inline-end: 0.25em;
+    & p {
+      @apply leading-relaxed text-sm;
     }
   }
+  /* Task lists */
+
+  .markdown-content input[type="checkbox"] {
+    @apply mr-2;
+  }
+
+  /* Embedded media */
+
+  .markdown-content iframe,
+  .markdown-content video {
+    @apply my-8 aspect-video w-full rounded-lg;
+  }
+
+  /* Sidenotes / Asides */
+
+  .markdown-content .aside,
+  .markdown-content .annotation {
+    @apply my-8 border-l border-border pl-4 text-sm leading-7 text-muted-foreground;
+  }
+
+  .markdown-content .aside > *:first-child,
+  .markdown-content .annotation > *:first-child {
+    @apply mt-0;
+  }
+
+  .markdown-content .aside > *:last-child,
+  .markdown-content .annotation > *:last-child {
+    @apply mb-0;
+  }
+
+  /* Label */
+
+  .markdown-content .aside__label,
+  .markdown-content .annotation__label {
+    @apply mb-2 block text-xs font-medium uppercase tracking-wider text-muted-foreground;
+  }
+
+  /* Optional date */
+
+  .markdown-content .aside__date,
+  .markdown-content .annotation__date {
+    @apply mt-3 block text-xs text-muted-foreground;
+  }
+
 }
